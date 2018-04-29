@@ -5,16 +5,24 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.tec.datosII.OdysseyClient.Login.LoginWindow;
 
 public class App extends Application {
     private static Stage rootStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("mainWindow.fxml"));
+        int width = 1280;
+        int height = 720;
+
+
+//        Parent root = FXMLLoader.load(getClass().getResource("../Login/loginWindow.fxml"));
         setRootStage(primaryStage);
         primaryStage.setTitle("Odissey");
-        primaryStage.setScene(new Scene(root, 1280, 720));
+
+        LoginWindow loginWindow = new LoginWindow();
+
+        primaryStage.setScene(loginWindow.load(width, height));
         primaryStage.show();
     }
 
