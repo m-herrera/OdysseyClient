@@ -12,17 +12,17 @@
    <children>
       <JFXTextField fx:id="userTextfield" focusColor="#de3511" layoutX="39.0" layoutY="91.0" prefHeight="27.0" prefWidth="224.0" promptText="Username" unFocusColor="#c3b7b7" />
       <JFXPasswordField fx:id="passwordTextfield" focusColor="#de3511" layoutX="39.0" layoutY="157.0" prefHeight="27.0" prefWidth="224.0" promptText="Password" unFocusColor="#c3b7b7" />
-      <JFXButton fx:id="loginBtn" layoutX="39.0" layoutY="209.0" onAction="#login" prefHeight="27.0" prefWidth="224.0" ripplerFill="#cd8787" style="-fx-background-color: #FF7C61;" text="Login" textFill="#c3b7b7">
+      <JFXButton layoutX="39.0" layoutY="209.0" onAction="#login" prefHeight="27.0" prefWidth="224.0" ripplerFill="#cd8787" style="-fx-background-color: #FF7C61;" text="Login" textFill="#4a4a4a">
          <font>
             <Font size="17.0" />
          </font>
       </JFXButton>
-      <Label layoutX="116.0" layoutY="34.0" text="Sign In" textFill="#c3b7b7">
+      <Label layoutX="116.0" layoutY="34.0" text="Sign In" textFill="#3c3c3c">
          <font>
             <Font size="21.0" />
          </font>
       </Label>
-      <Hyperlink fx:id="register" layoutX="184.0" layoutY="257.0" onAction="#changeToRegister" text="Create one" />
+      <Hyperlink layoutX="184.0" layoutY="257.0" onAction="#changeToRegister" text="Create one" />
       <Label layoutX="39.0" layoutY="261.0" text="Don't have an account?" />
    </children>
 </AnchorPane>
