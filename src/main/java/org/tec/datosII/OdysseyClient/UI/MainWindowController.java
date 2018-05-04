@@ -36,5 +36,10 @@ public class MainWindowController {
 
     }
 
+    @FXML
+    void uploadSong(ActionEvent event){
+
+    }
+
 }
 

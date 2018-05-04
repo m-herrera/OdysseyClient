@@ -9,7 +9,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import org.tec.datosII.OdysseyClient.App;
+import org.tec.datosII.OdysseyClient.Authenticator;
+
+import java.time.LocalDate;
+import java.util.LinkedList;
+import java.util.List;
 
 public class RegisterController {
 
@@ -18,6 +24,9 @@ public class RegisterController {
     public void setInitController(InitController controller){
         this.initController = controller;
     }
+
+    @FXML
+    private Label errorLabel;
 
     @FXML
     private JFXTextField firstNameTextfield;
@@ -71,12 +80,39 @@ public class RegisterController {
 
     @FXML
     void register(ActionEvent event) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
-        Parent page = loader.load();
-        Scene mainScene = new Scene(page, App.width, App.height);
+        String fname = firstNameTextfield.getText();
+        String lname = lastNameTextfield.getText();
+        String user = userTextfield.getText();
+        LocalDate birthday = birthdayPicker.getValue();
+        String password = passwordTextfield.getText();
+        String confirmPass = repeatPasswordTextfield.getText();
 
-        App.getRootStage().setScene(mainScene);
-        App.getRootStage().sizeToScene();
+        JFXCheckBox[] genres = {classicCheck, reggaetonCheck, popCheck, electronicCheck, indieCheck, jazzCheck, rockCheck, metalCheck, countryCheck};
+
+        LinkedList<String> selectedGenres = new LinkedList<String>();
+
+        for (JFXCheckBox genre : genres) {
+            if(genre.isSelected()){
+                selectedGenres.add(genre.getText());
+            }
+        }
+
+        Authenticator auth = new Authenticator();
+
+        if(fname.isEmpty() || lname.isEmpty() || user.isEmpty() || password.isEmpty() || selectedGenres.isEmpty() || confirmPass.isEmpty()) {
+            errorLabel.setText("All fields are required.");
+        }else if(!password.equals(confirmPass)){
+            errorLabel.setText("Passwords don't match");
+        }else if(auth.register(fname, lname, user, password, birthday, selectedGenres.toArray(new String[selectedGenres.size()]))){
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindow.fxml"));
+            Parent page = loader.load();
+            Scene mainScene = new Scene(page, App.width, App.height);
+
+            App.getRootStage().setScene(mainScene);
+            App.getRootStage().sizeToScene();
+        }else{
+            errorLabel.setText("Username is already taken.");
+        }
     }
 
 }

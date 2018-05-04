@@ -1,32 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXSlider?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXToolbar?>
+<?import com.jfoenix.controls.JFXTreeTableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 
-<BorderPane id="mainWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tec.datosII.OdysseyClient.MainWindowController">
+<BorderPane id="mainWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/9.0.4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tec.datosII.OdysseyClient.UI.MainWindowController">
+   <bottom>
+      <HBox prefHeight="40.0" prefWidth="1280.0" BorderPane.alignment="CENTER">
+         <children>
+            <JFXButton onAction="#prevSong" text=" ">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/prev.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </JFXButton>
+            <JFXButton onAction="#playPauseSong" text=" ">
+               <graphic>
+                  <ImageView fx:id="playPauseBtn" fitHeight="100.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/play.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </JFXButton>
+            <JFXButton onAction="#nextSong" text=" ">
+               <graphic>
+                  <ImageView fitHeight="100.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/next.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </JFXButton>
+            <JFXSlider fx:id="songSlider" prefHeight="54.0" prefWidth="1052.0" stylesheets="@mainStyles.css" />
+         </children></HBox>
+   </bottom>
    <top>
-      <ToolBar fx:id="toolbar" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <items>
-          <Button fx:id="button" mnemonicParsing="false" onAction="#buttonAction" text="Button" />
-        </items>
-      </ToolBar>
+      <JFXToolbar BorderPane.alignment="CENTER">
+         <right>
+            <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/search.png" />
+                     </image>
+                  </ImageView>
+                  <JFXTextField promptText="Search" />
+               </children>
+            </HBox>
+         </right>
+         <left>
+            <JFXButton onAction="#uploadSong" text="Upload song" BorderPane.alignment="CENTER">
+               <graphic>
+                  <ImageView fitHeight="150.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/upload.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </JFXButton>
+         </left></JFXToolbar>
    </top>
+   <left>
+      <JFXListView BorderPane.alignment="CENTER" />
+   </left>
    <right>
-      <ListView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <JFXListView fx:id="friendsList" BorderPane.alignment="CENTER" />
    </right>
    <center>
-      <TableView fx:id="songList" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <columns>
-          <TableColumn prefWidth="75.0" text="C1" />
-          <TableColumn prefWidth="75.0" text="C2" />
-        </columns>
-      </TableView>
+      <JFXTreeTableView fx:id="songList" BorderPane.alignment="CENTER" />
    </center>
-   <left>
-      <ListView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-   </left>
-   <bottom>
-      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-   </bottom>
 </BorderPane>
