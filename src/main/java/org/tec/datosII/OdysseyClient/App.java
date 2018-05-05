@@ -1,22 +1,26 @@
 package org.tec.datosII.OdysseyClient;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.tec.datosII.OdysseyClient.Login.LoginWindow;
+import org.tec.datosII.OdysseyClient.UI.LoginWindow;
 
 public class App extends Application {
     private static Stage rootStage;
+    public static int width = 1280;
+    public static int height = 720;
+    private static App instance;
+
+    public App(){
+        instance = this;
+    }
+
+    public static App getInstance(){
+        return instance;
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        int width = 1280;
-        int height = 720;
 
-
-//        Parent root = FXMLLoader.load(getClass().getResource("../Login/loginWindow.fxml"));
         setRootStage(primaryStage);
         primaryStage.setTitle("Odissey");
 
@@ -37,4 +41,6 @@ public class App extends Application {
     public static void main(String[] args){
         launch(args);
     }
+
+
 }

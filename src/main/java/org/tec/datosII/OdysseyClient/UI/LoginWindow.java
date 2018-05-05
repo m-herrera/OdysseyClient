@@ -1,4 +1,4 @@
-package org.tec.datosII.OdysseyClient.Login;
+package org.tec.datosII.OdysseyClient.UI;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
