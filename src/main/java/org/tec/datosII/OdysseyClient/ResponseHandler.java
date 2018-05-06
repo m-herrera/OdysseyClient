@@ -15,6 +15,7 @@ public class ResponseHandler {
             try {
                 this.wait();
             } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 

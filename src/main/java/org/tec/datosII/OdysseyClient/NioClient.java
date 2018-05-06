@@ -11,9 +11,14 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.*;
 
 public class NioClient implements Runnable {
+
+    private static NioClient instance;
+
     // The host:port combination to connect to
     private InetAddress hostAddress;
     private int port;
+
+    private volatile boolean running = true;
 
     // The selector we'll be monitoring
     private Selector selector;
@@ -30,10 +35,19 @@ public class NioClient implements Runnable {
     // Maps a SocketChannel to a ResponseHandler
     private Map rspHandlers = Collections.synchronizedMap(new HashMap());
 
-    public NioClient(InetAddress hostAddress, int port) throws IOException {
+    private NioClient(){}
+
+    public void setUp(InetAddress hostAddress, int port) throws IOException{
         this.hostAddress = hostAddress;
         this.port = port;
         this.selector = this.initSelector();
+    }
+
+    public static NioClient getInstance(){
+        if (instance == null){
+            instance = new NioClient();
+        }
+        return instance;
     }
 
     public void send(byte[] data, ResponseHandler handler) throws IOException {
@@ -57,8 +71,12 @@ public class NioClient implements Runnable {
         this.selector.wakeup();
     }
 
+    public void terminate(){
+        this.running = false;
+    }
+
     public void run() {
-        while (true) {
+        while (running) {
             try {
                 // Process any pending changes
                 synchronized (this.pendingChanges) {
@@ -79,7 +97,7 @@ public class NioClient implements Runnable {
                 }
 
                 // Wait for an event one of the registered channels
-                this.selector.select();
+                this.selector.select(10);
 
                 // Iterate over the set of keys for which events are available
                 Iterator selectedKeys = this.selector.selectedKeys().iterator();
@@ -92,7 +110,7 @@ public class NioClient implements Runnable {
                     }
 
                     // Check what event is available and deal with it
-                    if (key.isConnectable()) {
+                                                                                                                                                                                                                                                                                   if (key.isConnectable()) {
                         this.finishConnection(key);
                     } else if (key.isReadable()) {
                         this.read(key);
@@ -104,6 +122,8 @@ public class NioClient implements Runnable {
                 e.printStackTrace();
             }
         }
+        this.running = true;
+
     }
 
     private void read(SelectionKey key) throws IOException {
@@ -222,23 +242,15 @@ public class NioClient implements Runnable {
     }
 
     public void send(byte[] data){
+        Thread t = new Thread(this);
+        t.start();
         try {
             ResponseHandler handler = new ResponseHandler();
             send(data, handler);
             handler.waitForResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+            this.terminate();
 
-    public static void main(String[] args) {
-        try{
-            NioClient client = new NioClient(InetAddress.getLocalHost(), 2000);
-            Thread t = new Thread(client);
-            t.setDaemon(true);
-            t.start();
-            client.send("<Code>01</Code>".getBytes());
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

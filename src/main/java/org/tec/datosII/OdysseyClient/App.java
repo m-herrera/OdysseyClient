@@ -4,6 +4,8 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.tec.datosII.OdysseyClient.UI.LoginWindow;
 
+import java.net.InetAddress;
+
 public class App extends Application {
     private static Stage rootStage;
     public static int width = 1280;
@@ -39,8 +41,14 @@ public class App extends Application {
     }
 
     public static void main(String[] args){
+        try{
+            NioClient client = NioClient.getInstance();
+            client.setUp(InetAddress.getLocalHost(), 2000);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         launch(args);
     }
-
 
 }

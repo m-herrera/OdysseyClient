@@ -19,7 +19,8 @@ public class Authenticator {
 
         System.out.println(request);
 
-        SocketConnection socketConnection = new SocketConnection();
+        NioClient client = NioClient.getInstance();
+        client.send(request.getBytes());
 
         //SocketConnection.request(request);
         //if request return true or return false
@@ -45,9 +46,9 @@ public class Authenticator {
 
         System.out.println(request);
 
-        SocketConnection socketConnection = new SocketConnection();
+        NioClient client = NioClient.getInstance();
+        client.send(request.getBytes());
 
-        //SocketConnection.request(request);
         //if request return true or return false
 
         return true;
