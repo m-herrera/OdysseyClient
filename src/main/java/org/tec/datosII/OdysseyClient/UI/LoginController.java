@@ -35,6 +35,11 @@ public class LoginController {
     }
 
     @FXML
+    void focusPass(ActionEvent event){
+        passwordTextfield.requestFocus();
+    }
+
+    @FXML
     void login(ActionEvent event) throws Exception{
         String user = userTextfield.getText();
         String password = passwordTextfield.getText();
