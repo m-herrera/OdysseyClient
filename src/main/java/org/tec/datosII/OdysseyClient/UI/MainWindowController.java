@@ -15,6 +15,7 @@ import org.tec.datosII.OdysseyClient.NioClient;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Base64;
 import java.util.List;
@@ -69,8 +70,7 @@ public class MainWindowController {
 
         try {
             byte[] binaryFile = Files.readAllBytes(file.toPath());
-            String encodedFile = Base64.getEncoder().encodeToString(binaryFile);
-            System.out.println(encodedFile);
+            String encodedFile = new String(Base64.getEncoder().encode(binaryFile),StandardCharsets.US_ASCII);
             content.addText(encodedFile);
         }catch (Exception e){
             e.printStackTrace();

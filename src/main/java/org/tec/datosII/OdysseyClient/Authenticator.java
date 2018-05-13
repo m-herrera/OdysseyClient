@@ -32,9 +32,9 @@ public class Authenticator {
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "2");
 
-        Element fname = root.addElement("first name").addText(fnameStr);
+        Element fname = root.addElement("first_name").addText(fnameStr);
 
-        Element lname = root.addElement("last name").addText(lnameStr);
+        Element lname = root.addElement("last_name").addText(lnameStr);
 
         Element user = root.addElement("user").addText(userStr);
 
