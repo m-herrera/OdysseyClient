@@ -2,18 +2,31 @@ package org.tec.datosII.OdysseyClient.UI;
 
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXSlider;
+import com.jfoenix.controls.JFXTreeTableColumn;
 import com.jfoenix.controls.JFXTreeTableView;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.stage.FileChooser;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.tec.datosII.OdysseyClient.App;
+import org.tec.datosII.OdysseyClient.Metadata;
 import org.tec.datosII.OdysseyClient.NioClient;
 
+import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -21,6 +34,8 @@ import java.util.Base64;
 import java.util.List;
 
 public class MainWindowController {
+
+    ObservableList<Metadata> songs = FXCollections.observableArrayList();
 
     @FXML
     private ImageView playPauseBtn;
@@ -32,7 +47,27 @@ public class MainWindowController {
     private JFXListView<?> friendsList;
 
     @FXML
-    private JFXTreeTableView<?> songList;
+    private JFXTreeTableView<Metadata> songList;
+
+    private JFXTreeTableColumn<Metadata, String> nameColumn = new JFXTreeTableColumn<>("Name");
+
+    private JFXTreeTableColumn<Metadata, String> artistColumn = new JFXTreeTableColumn<>("Artist");
+
+    private JFXTreeTableColumn<Metadata, String> yearColumn = new JFXTreeTableColumn<>("Year");
+
+    private JFXTreeTableColumn<Metadata, String> albumColumn = new JFXTreeTableColumn<>("Album");
+
+    private JFXTreeTableColumn<Metadata, String> genreColumn = new JFXTreeTableColumn<>("Genre");
+
+    private JFXTreeTableColumn<Metadata, String> lyricsColumn = new JFXTreeTableColumn<>("Lyrics");
+
+    @FXML
+    private void initialize(){
+        songList.setShowRoot(false);
+        songList.setEditable(false);
+        songList.getColumns().setAll(nameColumn,artistColumn,albumColumn,yearColumn, genreColumn, lyricsColumn);
+
+    }
 
     @FXML
     void nextSong(ActionEvent event) {
@@ -52,8 +87,8 @@ public class MainWindowController {
     @FXML
     void uploadSong(ActionEvent event){
         FileChooser browser = new FileChooser();
-        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("MP3", "mp3");
-        browser.setSelectedExtensionFilter(filter);
+        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Audio files", "*.mp3");
+        browser.getExtensionFilters().setAll(filter);
         browser.setTitle("Select songs to upload");
         List<File> files = browser.showOpenMultipleDialog(App.getRootStage());
         for (File file:files) {
@@ -63,22 +98,68 @@ public class MainWindowController {
     }
 
     void uploadToServer(File file){
+
+        Metadata metadata = new Metadata(file.toPath().toString());
+
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "3");
-        Element name = root.addElement("name").addText(file.getName());
+
+        Element name = root.addElement("name").addText(metadata.name);
+        Element artist = root.addElement("artist").addText(metadata.artist);
+        Element year = root.addElement("year").addText(metadata.year);
+        Element album = root.addElement("album").addText(metadata.album);
+        Element genre = root.addElement("genre").addText(metadata.genre);
+        Element lyrics = root.addElement("lyrics").addText(metadata.lyrics);
+
+        Element cover = root.addElement("cover");
+        if(metadata.cover != null) {
+            try {
+                byte[] binaryFile = metadata.cover.toString().getBytes();
+                String encodedFile = Base64.getEncoder().encodeToString(binaryFile);
+                cover.addText(encodedFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         Element content = root.addElement("content");
 
         try {
             byte[] binaryFile = Files.readAllBytes(file.toPath());
-            String encodedFile = new String(Base64.getEncoder().encode(binaryFile),StandardCharsets.US_ASCII);
+            String encodedFile = Base64.getEncoder().encodeToString(binaryFile);
             content.addText(encodedFile);
         }catch (Exception e){
             e.printStackTrace();
         }
 
+        String request = document.asXML();
+
         NioClient client = NioClient.getInstance();
-        client.send(document.asXML().getBytes());
+        client.send(request.getBytes());
     }
 
+    @FXML
+    void contextMenu(ContextMenuEvent event){
+        ContextMenu altMenu = new ContextMenu();
+        MenuItem properties = new MenuItem("Properties");
+        properties.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event){
+                try {
+                    PropertiesDialog dialog = new PropertiesDialog();
+//                    dialog.showAndWait(new Metadata());
+                }catch (IOException ex){
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private ObservableList<Metadata> populateTable(){
+        Document document = DocumentHelper.createDocument();
+        Element root = document.addElement("request").addAttribute("opcode", "4");
+        NioClient.getInstance().send(document.asXML().getBytes());
+        return FXCollections.observableArrayList();
+    }
 }
 
