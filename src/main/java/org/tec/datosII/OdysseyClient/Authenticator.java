@@ -11,7 +11,7 @@ public class Authenticator {
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "1");
 
-        Element user = root.addElement("user").addText(userStr);
+        Element user = root.addElement("username").addText(userStr);
 
         Element password = root.addElement("password").addText(passwordStr);
 
@@ -36,7 +36,7 @@ public class Authenticator {
 
         Element lname = root.addElement("last_name").addText(lnameStr);
 
-        Element user = root.addElement("user").addText(userStr);
+        Element user = root.addElement("username").addText(userStr);
 
         Element bday = root.addElement("birthday").addText(bdayDate.toString());
 
