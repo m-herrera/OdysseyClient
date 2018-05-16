@@ -1,6 +1,9 @@
 package org.tec.datosII.OdysseyClient;
 
 
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+
 public class ResponseHandler {
     private byte[] rsp = null;
 
@@ -18,7 +21,17 @@ public class ResponseHandler {
                 e.printStackTrace();
             }
         }
+    }
 
-        System.out.println("Response:" + new String(this.rsp));
+    public Document getXmlResponse() throws Exception{
+        return DocumentHelper.parseText(rsp.toString());
+    }
+
+    public byte[] getResponse(){
+        return rsp;
+    }
+
+    public String getStrResponse(){
+        return new String(rsp);
     }
 }

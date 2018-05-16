@@ -11,8 +11,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.stage.FileChooser;
@@ -23,12 +21,10 @@ import org.tec.datosII.OdysseyClient.App;
 import org.tec.datosII.OdysseyClient.Metadata;
 import org.tec.datosII.OdysseyClient.NioClient;
 
-import java.awt.*;
-import java.awt.event.MouseEvent;
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.FileInputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Base64;
 import java.util.List;
@@ -91,15 +87,19 @@ public class MainWindowController {
         browser.getExtensionFilters().setAll(filter);
         browser.setTitle("Select songs to upload");
         List<File> files = browser.showOpenMultipleDialog(App.getRootStage());
-        for (File file:files) {
-            uploadToServer(file);
-            System.out.println(file.getName());
+        if(!files.isEmpty()) {
+            for (File file : files) {
+                uploadToServer(file);
+                System.out.println(file.getName());
+            }
         }
     }
 
     void uploadToServer(File file){
 
         Metadata metadata = new Metadata(file.toPath().toString());
+
+        metadata.addLyrics();
 
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "3");
@@ -113,13 +113,20 @@ public class MainWindowController {
 
         Element cover = root.addElement("cover");
         if(metadata.cover != null) {
+            String imageString = null;
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
             try {
-                byte[] binaryFile = metadata.cover.toString().getBytes();
-                String encodedFile = Base64.getEncoder().encodeToString(binaryFile);
-                cover.addText(encodedFile);
-            } catch (Exception e) {
+                ImageIO.write(metadata.cover, "png", bos);
+                byte[] imageBytes = bos.toByteArray();
+
+                String encodedFile = Base64.getEncoder().encodeToString(imageBytes);
+
+                bos.close();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
 
         Element content = root.addElement("content");

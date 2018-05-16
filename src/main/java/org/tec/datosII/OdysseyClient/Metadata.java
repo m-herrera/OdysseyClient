@@ -16,8 +16,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class Metadata extends RecursiveTreeObject<Metadata> {
-    private static final String apiId = "de20700b5c5ea696703e715363acf175";
-
     private static final String[] genres =
             {"Blues",
             "Classic Rock",

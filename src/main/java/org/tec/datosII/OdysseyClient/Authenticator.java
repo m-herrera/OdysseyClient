@@ -4,6 +4,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 public class Authenticator {
@@ -17,13 +18,11 @@ public class Authenticator {
 
         String request = document.asXML();
 
-        System.out.println(request);
-
         NioClient client = NioClient.getInstance();
-        client.send(request.getBytes());
 
-        //SocketConnection.request(request);
-        //if request return true or return false
+        ResponseHandler loginHandler = client.send(request.getBytes());
+
+        System.out.println(loginHandler.getStrResponse());
 
         return true;
     }
@@ -44,11 +43,10 @@ public class Authenticator {
 
         String request = document.asXML();
 
-        System.out.println(request);
-
         NioClient client = NioClient.getInstance();
-        client.send(request.getBytes());
+        ResponseHandler registerHandler = client.send(request.getBytes());
 
+        System.out.println(registerHandler.getStrResponse());
         //if request return true or return false
 
         return true;

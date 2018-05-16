@@ -50,7 +50,7 @@ public class NioClient implements Runnable {
         return instance;
     }
 
-    public void send(byte[] data, ResponseHandler handler) throws IOException {
+    private void send(byte[] data, ResponseHandler handler) throws IOException {
         // Start a new connection
         SocketChannel socket = this.initiateConnection();
 
@@ -241,7 +241,7 @@ public class NioClient implements Runnable {
         return SelectorProvider.provider().openSelector();
     }
 
-    public void send(byte[] data){
+    public ResponseHandler send(byte[] data){
         Thread t = new Thread(this);
         t.start();
         try {
@@ -249,10 +249,12 @@ public class NioClient implements Runnable {
             send(data, handler);
             handler.waitForResponse();
             this.terminate();
+            return handler;
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 }
 
