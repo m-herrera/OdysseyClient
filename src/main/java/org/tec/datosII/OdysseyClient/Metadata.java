@@ -4,28 +4,19 @@ import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
-import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
-import com.wrapper.spotify.model_objects.specification.Track;
-import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
-import com.wrapper.spotify.requests.data.search.simplified.SearchTracksRequest;
-import javafx.scene.image.Image;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 
 public class Metadata extends RecursiveTreeObject<Metadata> {
-    private static final String clientId = "a06fede390b14f838c6b4310efb69c5b";
-    private static final String clientSecret = "cd97e11e2fec427aa90095d9d7ace133";
-
-    private static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
-            .setClientId(clientId)
-            .setClientSecret(clientSecret)
-            .build();
-    private static final ClientCredentialsRequest credentialsRequest = spotifyApi.clientCredentials().build();
+    private static final String apiId = "de20700b5c5ea696703e715363acf175";
 
     private static final String[] genres =
             {"Blues",
@@ -115,7 +106,7 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
     public String album = "";
     public String genre = "";
     public String lyrics = "";
-    public Image cover;
+    public BufferedImage cover;
 
 
     public Metadata(String path){
@@ -139,7 +130,8 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
                 year = tag.getYear();
                 album = tag.getAlbum();
                 genre = genres[tag.getGenre()];
-                cover = new Image(new ByteArrayInputStream(tag.getAlbumImage()));
+                cover = ImageIO.read(new ByteArrayInputStream(tag.getAlbumImage()));
+
 
             }else{
                 System.out.println("Other tag");
@@ -150,21 +142,31 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
             ex.printStackTrace();
         }
     }
-    public void update(){
-        try{
-           final ClientCredentials credentials = credentialsRequest.execute();
+    public void addLyrics(){
+        String BASE_URL = "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect";
 
-           spotifyApi.setAccessToken(credentials.getAccessToken());
+        try {
+            String parameters = "?artist=" + URLEncoder.encode(artist, "UTF-8") + "&song=" + URLEncoder.encode(name, "UTF-8");
+            URL url = new URL(BASE_URL + parameters);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
 
-            SearchTracksRequest searchRequest = spotifyApi.searchTracks(name).build();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
 
-            Track[] tracks = searchRequest.execute().getItems();
+            StringBuffer content = new StringBuffer();
 
-            for(Track track : tracks){
-                System.out.println("Nombre: " + track.getName());
+            int size;
+            char[] buf = new char[4096];
+            while ((size = in.read(buf)) != -1) {
+                content.append(new String(buf, 0, size));
             }
+            in.close();
 
-
+            Document document = DocumentHelper.parseText(content.toString());
+            Element root = document.getRootElement();
+            String lyrics = root.elementIterator("Lyric").next().getText();
+            this.lyrics = lyrics;
 
         }catch (Exception ex){
             ex.printStackTrace();
