@@ -140,6 +140,9 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
             ex.printStackTrace();
         }
     }
+
+    public Metadata(){}
+
     public void addLyrics(){
         String BASE_URL = "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect";
 

@@ -24,7 +24,7 @@ public class ResponseHandler {
     }
 
     public Document getXmlResponse() throws Exception{
-        return DocumentHelper.parseText(rsp.toString());
+        return DocumentHelper.parseText(new String(rsp));
     }
 
     public byte[] getResponse(){

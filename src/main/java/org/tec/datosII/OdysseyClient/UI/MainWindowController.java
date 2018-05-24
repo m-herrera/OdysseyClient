@@ -1,9 +1,11 @@
 package org.tec.datosII.OdysseyClient.UI;
 
-import com.jfoenix.controls.JFXListView;
-import com.jfoenix.controls.JFXSlider;
-import com.jfoenix.controls.JFXTreeTableColumn;
-import com.jfoenix.controls.JFXTreeTableView;
+import com.jfoenix.controls.*;
+import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -11,15 +13,16 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.stage.FileChooser;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.tec.datosII.OdysseyClient.App;
-import org.tec.datosII.OdysseyClient.Metadata;
-import org.tec.datosII.OdysseyClient.NioClient;
+import org.tec.datosII.OdysseyClient.*;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
@@ -27,11 +30,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Base64;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MainWindowController {
+    TablePage[] tablePages = new TablePage[3];
 
-    ObservableList<Metadata> songs = FXCollections.observableArrayList();
+    ObservableList<Metadata> tableList = FXCollections.observableArrayList();
 
     @FXML
     private ImageView playPauseBtn;
@@ -55,14 +60,52 @@ public class MainWindowController {
 
     private JFXTreeTableColumn<Metadata, String> genreColumn = new JFXTreeTableColumn<>("Genre");
 
-    private JFXTreeTableColumn<Metadata, String> lyricsColumn = new JFXTreeTableColumn<>("Lyrics");
-
     @FXML
     private void initialize(){
+        nameColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
+            ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().name);
+            return property;
+        });
+
+        artistColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
+            ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().artist);
+            return property;
+        });
+
+        albumColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
+            ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().album);
+            return property;
+        });
+
+        yearColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
+            ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().year);
+            return property;
+        });
+
+        genreColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
+            ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().genre);
+            return property;
+        });
+
+        final TreeItem<Metadata> root = new RecursiveTreeItem<>(tableList, RecursiveTreeObject::getChildren);
+
+        songList.setRoot(root);
         songList.setShowRoot(false);
         songList.setEditable(false);
-        songList.getColumns().setAll(nameColumn,artistColumn,albumColumn,yearColumn, genreColumn, lyricsColumn);
+        songList.getColumns().setAll(nameColumn,artistColumn,albumColumn,yearColumn, genreColumn);
 
+
+
+        tablePages[0] = populateTable(0);
+        tableList.addAll(tablePages[0].songs);
+
+        tablePages[1] = populateTable(1);
+        tableList.addAll(tablePages[1].songs);
+
+        tablePages[2] = populateTable(2);
+        tableList.addAll(tablePages[2].songs);
+
+//        songList.refresh();
     }
 
     @FXML
@@ -154,7 +197,7 @@ public class MainWindowController {
             public void handle(ActionEvent event){
                 try {
                     PropertiesDialog dialog = new PropertiesDialog();
-//                    dialog.showAndWait(new Metadata());
+//                    dialog.showAndWait();
                 }catch (IOException ex){
                     ex.printStackTrace();
                 }
@@ -162,11 +205,46 @@ public class MainWindowController {
         });
     }
 
-    private ObservableList<Metadata> populateTable(){
+    private TablePage populateTable(int pageNumber){
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "4");
-        NioClient.getInstance().send(document.asXML().getBytes());
-        return FXCollections.observableArrayList();
+        root.addElement("sortBy").addText("name");
+        root.addElement("sortWith").addText("quickSort");
+        root.addElement("page").addText(String.valueOf(pageNumber));
+
+        NioClient client = NioClient.getInstance();
+        String request = document.asXML();
+        ResponseHandler handler = client.send(request.getBytes());
+
+        TablePage page = null;
+        try {
+            page = new TablePage();
+            Document response = handler.getXmlResponse();
+            Element responseRoot = response.getRootElement();
+            page.pageNumber = pageNumber;
+            page.totalSongs = Integer.parseInt(responseRoot.elementIterator("numberOfSongs").next().getText());
+            page.pages = Integer.parseInt(responseRoot.elementIterator("pages").next().getText());
+            page.pageSize = Integer.parseInt(responseRoot.elementIterator("pageSize").next().getText());
+
+            Element songs = responseRoot.elementIterator("songs").next();
+            for (Element song : songs.elements()) {
+                Metadata newSong = new Metadata();
+
+                newSong.name = song.elementIterator("name").next().getText();
+                newSong.album = song.elementIterator("album").next().getText();
+                newSong.artist = song.elementIterator("artist").next().getText();
+                page.songs.addAll(newSong);
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+
+
+        return page;
+    }
+
+    private void updateSongs(){
+
     }
 }
 
