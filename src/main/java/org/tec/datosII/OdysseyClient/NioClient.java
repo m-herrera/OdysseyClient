@@ -1,5 +1,7 @@
 package org.tec.datosII.OdysseyClient;
 
+import org.dom4j.DocumentHelper;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -8,6 +10,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
+import java.nio.charset.Charset;
 import java.util.*;
 
 public class NioClient implements Runnable {
@@ -128,22 +131,36 @@ public class NioClient implements Runnable {
 
     private void read(SelectionKey key) throws IOException {
         SocketChannel socketChannel = (SocketChannel) key.channel();
+        String response = new String();
 
         // Clear out our read buffer so it's ready for new data
         this.readBuffer.clear();
 
         // Attempt to read off the channel
         int numRead;
-        try {
-            numRead = socketChannel.read(this.readBuffer);
-        } catch (IOException e) {
-            // The remote forcibly closed the connection, cancel
-            // the selection key and close the channel.
-            key.cancel();
-            socketChannel.close();
-            return;
+        int totalRead = 0;
+        while(true) {
+            try {
+                numRead = socketChannel.read(this.readBuffer);
+                totalRead += numRead;
+                byte[] rspData = new byte[numRead];
+                System.arraycopy(this.readBuffer.array(), 0, rspData, 0, numRead);
+                response = response.concat(new String(rspData));
+                this.readBuffer.clear();
+                try {
+                    DocumentHelper.parseText(response);
+                    break;
+                } catch (Exception ex) {
+                    continue;
+                }
+            } catch (IOException e) {
+                // The remote forcibly closed the connection, cancel
+                // the selection key and close the channel.
+                key.cancel();
+                socketChannel.close();
+                return;
+            }
         }
-
         if (numRead == -1) {
             // Remote entity shut the socket down cleanly. Do the
             // same from our end and cancel the channel.
@@ -151,9 +168,8 @@ public class NioClient implements Runnable {
             key.cancel();
             return;
         }
-
         // Handle the response
-        this.handleResponse(socketChannel, this.readBuffer.array(), numRead);
+        this.handleResponse(socketChannel, response.getBytes(), totalRead);
     }
 
     private void handleResponse(SocketChannel socketChannel, byte[] data, int numRead) throws IOException {
