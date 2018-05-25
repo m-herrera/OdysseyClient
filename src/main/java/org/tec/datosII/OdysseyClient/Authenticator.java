@@ -11,44 +11,49 @@ public class Authenticator {
     public boolean login(String userStr, String passwordStr) {
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "1");
-
-        Element user = root.addElement("username").addText(userStr);
-
-        Element password = root.addElement("password").addText(passwordStr);
+        root.addElement("username").addText(userStr);
+        root.addElement("password").addText(passwordStr);
 
         String request = document.asXML();
 
         NioClient client = NioClient.getInstance();
 
         ResponseHandler loginHandler = client.send(request.getBytes());
-
-        System.out.println(loginHandler.getStrResponse());
-
-        return true;
+        try {
+            Document response = loginHandler.getXmlResponse();
+            String status = response.getRootElement().elementIterator("status").next().getText();
+            if(status.equals("true")){
+                return true;
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return false;
     }
 
     public boolean register(String fnameStr, String lnameStr, String userStr, String passwordStr, LocalDate bdayDate, String[] genresStr){
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "2");
-
-        Element fname = root.addElement("first_name").addText(fnameStr);
-
-        Element lname = root.addElement("last_name").addText(lnameStr);
-
-        Element user = root.addElement("username").addText(userStr);
-
-        Element bday = root.addElement("birthday").addText(bdayDate.toString());
-
-        Element password = root.addElement("password").addText(passwordStr);
+        root.addElement("first_name").addText(fnameStr);
+        root.addElement("last_name").addText(lnameStr);
+        root.addElement("username").addText(userStr);
+        root.addElement("birthday").addText(bdayDate.toString());
+        root.addElement("password").addText(passwordStr);
 
         String request = document.asXML();
 
         NioClient client = NioClient.getInstance();
         ResponseHandler registerHandler = client.send(request.getBytes());
 
-        System.out.println(registerHandler.getStrResponse());
-        //if request return true or return false
-
-        return true;
+        try {
+            Document response = registerHandler.getXmlResponse();
+            String status = response.getRootElement().elementIterator("status").next().getText();
+            if(status.equals("true")){
+                return true;
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return false;
     }
 }

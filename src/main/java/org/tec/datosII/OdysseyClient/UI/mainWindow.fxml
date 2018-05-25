@@ -46,7 +46,7 @@
          </children></HBox>
    </bottom>
    <top>
-      <JFXToolbar BorderPane.alignment="CENTER">
+      <JFXToolbar style="-fx-background-color: #F55B3B;" BorderPane.alignment="CENTER">
          <right>
             <HBox alignment="CENTER" prefHeight="40.0" prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
                <children>
@@ -78,6 +78,6 @@
       <JFXListView fx:id="friendsList" BorderPane.alignment="CENTER" />
    </right>
    <center>
-      <JFXTreeTableView fx:id="songList" BorderPane.alignment="CENTER" />
+      <JFXTreeTableView fx:id="songList" onContextMenuRequested="#contextMenu" onMouseClicked="#playSong" onScroll="#scrollHandler" onSort="#sort" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>

@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -18,6 +19,9 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -119,7 +123,25 @@ public class MainWindowController {
     }
 
     @FXML
+    void playSong(MouseEvent event) {
+        if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+            Metadata metadata = songList.getSelectionModel().getSelectedItem().getValue();
+            MusicPlayer.getInstance().play(metadata, 0);
+        }
+    }
+
+    @FXML
     void prevSong(ActionEvent event) {
+
+    }
+
+    @FXML
+    void scrollHandler(ScrollEvent event) {
+
+    }
+
+    @FXML
+    void sort(ActionEvent event) {
 
     }
 
@@ -147,12 +169,12 @@ public class MainWindowController {
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "3");
 
-        Element name = root.addElement("name").addText(metadata.name);
-        Element artist = root.addElement("artist").addText(metadata.artist);
-        Element year = root.addElement("year").addText(metadata.year);
-        Element album = root.addElement("album").addText(metadata.album);
-        Element genre = root.addElement("genre").addText(metadata.genre);
-        Element lyrics = root.addElement("lyrics").addText(metadata.lyrics);
+        root.addElement("name").addText(metadata.name);
+        root.addElement("artist").addText(metadata.artist);
+        root.addElement("year").addText(metadata.year);
+        root.addElement("album").addText(metadata.album);
+        root.addElement("genre").addText(metadata.genre);
+        root.addElement("lyrics").addText(metadata.lyrics);
 
         Element cover = root.addElement("cover");
         if(metadata.cover != null) {
@@ -160,10 +182,11 @@ public class MainWindowController {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
             try {
-                ImageIO.write(metadata.cover, "png", bos);
+                ImageIO.write(SwingFXUtils.fromFXImage(metadata.cover, null), "png", bos);
                 byte[] imageBytes = bos.toByteArray();
 
                 String encodedFile = Base64.getEncoder().encodeToString(imageBytes);
+                cover.addText(encodedFile);
 
                 bos.close();
             } catch (IOException e) {
@@ -196,13 +219,17 @@ public class MainWindowController {
             @Override
             public void handle(ActionEvent event){
                 try {
+                    Metadata selected = songList.getSelectionModel().getSelectedItem().getValue();
                     PropertiesDialog dialog = new PropertiesDialog();
-//                    dialog.showAndWait();
+                    dialog.showAndWait(selected);
                 }catch (IOException ex){
                     ex.printStackTrace();
                 }
             }
         });
+
+        altMenu.getItems().add(properties);
+        altMenu.show(App.getRootStage(), event.getSceneX(), event.getSceneY());
     }
 
     private TablePage populateTable(int pageNumber){

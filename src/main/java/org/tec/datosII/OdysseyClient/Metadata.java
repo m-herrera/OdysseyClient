@@ -4,12 +4,11 @@ import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
+import javafx.scene.image.Image;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -104,7 +103,7 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
     public String album = "";
     public String genre = "";
     public String lyrics = "";
-    public BufferedImage cover;
+    public Image cover;
 
 
     public Metadata(String path){
@@ -128,8 +127,7 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
                 year = tag.getYear();
                 album = tag.getAlbum();
                 genre = genres[tag.getGenre()];
-                cover = ImageIO.read(new ByteArrayInputStream(tag.getAlbumImage()));
-
+                cover = new Image(new ByteArrayInputStream(tag.getAlbumImage()));
 
             }else{
                 System.out.println("Other tag");
