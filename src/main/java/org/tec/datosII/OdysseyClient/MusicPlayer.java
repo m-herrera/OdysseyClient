@@ -1,24 +1,36 @@
 package org.tec.datosII.OdysseyClient;
 
-import javafx.scene.media.MediaPlayer;
+import javazoom.jl.player.Player;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
+import java.nio.file.Files;
 import java.util.Base64;
 
-public class MusicPlayer {
+/**
+ * Reproductor de audio en streaming
+ */
+public class MusicPlayer{
+    /**
+     * Instancia unica del reproductor
+     */
     private static MusicPlayer instance;
 
+    /**
+     * Constructor privado del reproductor
+     */
     private MusicPlayer(){}
 
+    /**
+     * Singleton para obtener la instancia del reproductor
+     * @return la instancia del reproductor
+     */
     public static MusicPlayer getInstance(){
         if(instance == null){
             instance = new MusicPlayer();
@@ -26,6 +38,11 @@ public class MusicPlayer {
         return instance;
     }
 
+    /**
+     * Reproduce una cancion
+     * @param song Metadata de la cancion a reproducir
+     * @param chunk Bloque desde el cual reproducir la cancion
+     */
     public void play(Metadata song, int chunk){
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "5");
@@ -35,27 +52,9 @@ public class MusicPlayer {
         root.addElement("year").addText(song.year);
         root.addElement("album").addText(song.album);
         root.addElement("genre").addText(song.genre);
-        root.addElement("chunk").addText(String.valueOf(chunk));
 
-        String request = document.asXML();
-
-        NioClient client = NioClient.getInstance();
-        ResponseHandler handler = client.send(request.getBytes());
-        try {
-            System.out.println(handler.getStrResponse());
-            Document response = handler.getXmlResponse();
-            String audio = response.getRootElement().elementIterator().next().getText();
-            InputStream stream = new ByteArrayInputStream(Base64.getDecoder().decode(audio));
-
-
-            Clip clip = AudioSystem.getClip();
-            AudioInputStream buffer = AudioSystem.getAudioInputStream(stream);
-            clip.open(buffer);
-            clip.start();
-
-
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
+        Thread playerThread = new PlayerThread(document, chunk);
+        playerThread.start();
     }
+
 }

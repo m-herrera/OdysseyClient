@@ -7,7 +7,16 @@ import org.dom4j.Element;
 import java.io.IOException;
 import java.time.LocalDate;
 
+/**
+ * Clase encargada de realizar el proceso de autenticacion con el servidor
+ */
 public class Authenticator {
+    /**
+     * Login de un usuario con el servidor
+     * @param userStr Nombre de usuario
+     * @param passwordStr Contrasena
+     * @return boolean que indica si se concedio el acceso
+     */
     public boolean login(String userStr, String passwordStr) {
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "1");
@@ -31,6 +40,16 @@ public class Authenticator {
         return false;
     }
 
+    /**
+     * Registro de un nuevo usuario en el servidor
+     * @param fnameStr Nombre
+     * @param lnameStr Apellido
+     * @param userStr Nombre de usuario
+     * @param passwordStr Contrasena
+     * @param bdayDate Cumpleanos
+     * @param genresStr Generos favoritos
+     * @return boolean que indica si la creacion del usuario fue exitosa
+     */
     public boolean register(String fnameStr, String lnameStr, String userStr, String passwordStr, LocalDate bdayDate, String[] genresStr){
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "2");

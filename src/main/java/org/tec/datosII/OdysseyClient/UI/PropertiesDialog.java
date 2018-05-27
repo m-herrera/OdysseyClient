@@ -10,11 +10,24 @@ import org.tec.datosII.OdysseyClient.Metadata;
 
 import java.io.IOException;
 
+/**
+ * Ventana de propiedades de una cancion
+ */
 public class PropertiesDialog {
-
+    /**
+     * Stage de la ventana
+     */
     private Stage dialog;
+
+    /**
+     * Loader de la ventana
+     */
     private FXMLLoader loader;
 
+    /**
+     * Constructor que carga la ventana
+     * @throws IOException
+     */
     PropertiesDialog() throws IOException {
         loader = new FXMLLoader(getClass().getResource("properties.fxml"));
 
@@ -30,6 +43,11 @@ public class PropertiesDialog {
         dialog.setResizable(false);
     }
 
+    /**
+     * Abre la ventana y espera
+     * @param metadata Metadata de la cancion a cargar
+     * @return Metadata editada de la cancion
+     */
     public Metadata showAndWait(Metadata metadata){
         PropertiesDialogController controller = loader.getController();
         controller.load(metadata);

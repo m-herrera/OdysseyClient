@@ -17,67 +17,135 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Controlador de la ventana de registro
+ */
 public class RegisterController {
 
+    /**
+     * Controlador de la ventana inicial
+     */
     private InitController initController;
 
+    /**
+     * Establece el controlador de la ventana inicial
+     * @param controller Controlador inicial
+     */
     public void setInitController(InitController controller){
         this.initController = controller;
     }
 
+    /**
+     * Label de error
+     */
     @FXML
     private Label errorLabel;
 
+    /**
+     * Texfield con el nombre
+     */
     @FXML
     private JFXTextField firstNameTextfield;
 
+    /**
+     * Textfield con el apellido
+     */
     @FXML
     private JFXTextField lastNameTextfield;
 
+    /**
+     * Texfield con el nombre de usuario
+     */
     @FXML
     private JFXTextField userTextfield;
 
+    /**
+     * Selector de fecha de nacimiento
+     */
     @FXML
     private JFXDatePicker birthdayPicker;
 
+    /**
+     * Textfield con la contrasena
+     */
     @FXML
     private JFXPasswordField passwordTextfield;
 
+    /**
+     * Texfield para repetir la contrasena
+     */
     @FXML
     private JFXPasswordField repeatPasswordTextfield;
 
+    /**
+     * CheckBox de Clasica
+     */
     @FXML
     private JFXCheckBox classicCheck;
 
+    /**
+     * CheckBox de Reggaeton
+     */
     @FXML
     private JFXCheckBox reggaetonCheck;
 
+    /**
+     * CheckBox de Pop
+     */
     @FXML
     private JFXCheckBox popCheck;
 
+    /**
+     * CheckBox de Electronica
+     */
     @FXML
     private JFXCheckBox electronicCheck;
 
+    /**
+     * CheckBox de Indie
+     */
     @FXML
     private JFXCheckBox indieCheck;
 
+    /**
+     * CheckBox de Jazz
+     */
     @FXML
     private JFXCheckBox jazzCheck;
 
+    /**
+     * CheckBox de Rock
+     */
     @FXML
     private JFXCheckBox rockCheck;
 
+    /**
+     * CheckBox de Metal
+     */
     @FXML
     private JFXCheckBox metalCheck;
 
+    /**
+     * CheckBox de Country
+     */
     @FXML
     private JFXCheckBox countryCheck;
 
+    /**
+     * Cambiar a ventana de login
+     * @param event
+     * @throws Exception
+     */
     @FXML
     void changeToLogin(ActionEvent event) throws Exception{
         initController.loadLogin();
     }
 
+    /**
+     * Ejecuta el registro en el servidor
+     * @param event
+     * @throws Exception
+     */
     @FXML
     void register(ActionEvent event) throws Exception{
         String fname = firstNameTextfield.getText();

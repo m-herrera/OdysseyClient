@@ -4,8 +4,18 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
+/**
+ * Ventana inicial
+ */
 public class LoginWindow{
 
+    /**
+     * Carga la escena con la ventana inicial
+     * @param width Ancho de la ventana
+     * @param height Alto de la ventana
+     * @return Scene de la ventana
+     * @throws Exception
+     */
     public Scene load(int width, int height) throws Exception{
         FXMLLoader loader = new FXMLLoader(getClass().getResource("init.fxml"));
         Parent root = loader.load();

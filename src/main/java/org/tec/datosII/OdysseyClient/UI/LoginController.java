@@ -12,33 +12,66 @@ import javafx.stage.Stage;
 import org.tec.datosII.OdysseyClient.App;
 import org.tec.datosII.OdysseyClient.Authenticator;
 
+/**
+ * Controlador de la ventana de login
+ */
 public class LoginController {
 
+    /**
+     * Controlador de la ventana inicial
+     */
     private InitController initController;
 
+    /**
+     * Establecer el controlador de la ventana inicial
+     * @param controller Controlador inicial
+     */
     public void setInitController(InitController controller){
         this.initController = controller;
     }
 
+    /**
+     * Textfield del nombre de usuario
+     */
     @FXML
     private JFXTextField userTextfield;
 
+    /**
+     * Textfiel de la contrasena
+     */
     @FXML
     private JFXPasswordField passwordTextfield;
 
+    /**
+     * Label de error
+     */
     @FXML
     private Label errorLabel;
 
+    /**
+     * Cambiar ventana a registro
+     * @param event
+     * @throws Exception
+     */
     @FXML
     void changeToRegister(ActionEvent event) throws Exception {
         initController.loadRegister();
     }
 
+    /**
+     * Cambiar enfoque a la casilla de contrasena
+     * @param event
+     */
     @FXML
     void focusPass(ActionEvent event){
         passwordTextfield.requestFocus();
     }
 
+    /**
+     * Ejecutar login
+     * @param event
+     * @throws Exception
+     */
     @FXML
     void login(ActionEvent event) throws Exception{
         String user = userTextfield.getText();

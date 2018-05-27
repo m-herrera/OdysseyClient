@@ -14,7 +14,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
+/**
+ * Metadata de una cancion
+ */
 public class Metadata extends RecursiveTreeObject<Metadata> {
+    /**
+     * Lista de generos de musica soportados por ID3
+     */
     private static final String[] genres =
             {"Blues",
             "Classic Rock",
@@ -97,15 +103,40 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
             "Rock & Roll",
             "Hard Rock"};
 
+    /**
+     * Nombre de la cancion
+     */
     public String name = "";
+    /**
+     * Nombre del artista
+     */
     public String artist = "";
+    /**
+     * Anno de publicacion
+     */
     public String year = "";
+    /**
+     * Album de la cancion
+     */
     public String album = "";
+    /**
+     * Genero al que pertenece
+     */
     public String genre = "";
+    /**
+     * Letra de la cancion
+     */
     public String lyrics = "";
+    /**
+     * Imagen de portada
+     */
     public Image cover;
 
 
+    /**
+     * Contructor desde archivo
+     * @param path Direccion de la cancion en disco
+     */
     public Metadata(String path){
         try {
             Mp3File mp3File = new Mp3File(path);
@@ -139,8 +170,14 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
         }
     }
 
+    /**
+     * Constructor por defecto
+     */
     public Metadata(){}
 
+    /**
+     * Anadir letra de la cancion desde el API de ChartLyrics
+     */
     public void addLyrics(){
         String BASE_URL = "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect";
 

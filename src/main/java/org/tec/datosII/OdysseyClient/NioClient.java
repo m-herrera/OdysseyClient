@@ -13,6 +13,9 @@ import java.nio.channels.spi.SelectorProvider;
 import java.nio.charset.Charset;
 import java.util.*;
 
+/**
+ * Conexion de red
+ */
 public class NioClient implements Runnable {
 
     private static NioClient instance;

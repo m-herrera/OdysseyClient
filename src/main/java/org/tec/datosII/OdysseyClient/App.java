@@ -6,20 +6,36 @@ import org.tec.datosII.OdysseyClient.UI.LoginWindow;
 
 import java.net.InetAddress;
 
+/**
+ * Clase principal del cliente de Odissey++
+ */
 public class App extends Application {
+    /**
+     * Stage principal de la aplicacion
+     */
     private static Stage rootStage;
+    /**
+     * Ancho por defecto de la ventana
+     */
     public static int width = 1280;
+    /**
+     * Alto por defecto de la ventana
+     */
     public static int height = 720;
+    /**
+     * Instancia de la aplicacion
+     */
     private static App instance;
 
     public App(){
         instance = this;
     }
 
-    public static App getInstance(){
-        return instance;
-    }
-
+    /**
+     * Metodo de inicio de la aplicacion
+     * @param primaryStage stage inicial a cargar
+     * @throws Exception
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -32,14 +48,26 @@ public class App extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Metodo para obtener el stage principal de la aplicacion
+     * @return stage principal
+     */
     public static Stage getRootStage() {
         return rootStage;
     }
 
+    /**
+     * Metodo para establecer el stage principal de la aplicacion
+     * @param rootStage
+     */
     public static void setRootStage(Stage rootStage) {
         App.rootStage = rootStage;
     }
 
+    /**
+     * Metodo inicial del programa
+     * @param args
+     */
     public static void main(String[] args){
         try{
             NioClient client = NioClient.getInstance();
