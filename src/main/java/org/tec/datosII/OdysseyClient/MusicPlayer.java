@@ -23,6 +23,11 @@ public class MusicPlayer{
     private static MusicPlayer instance;
 
     /**
+     * Hilo unico del reproductor
+     */
+    Thread playerThread;
+
+    /**
      * Constructor privado del reproductor
      */
     private MusicPlayer(){}
@@ -44,6 +49,10 @@ public class MusicPlayer{
      * @param chunk Bloque desde el cual reproducir la cancion
      */
     public void play(Metadata song, int chunk){
+        if(playerThread != null){
+            //Deberia detener el thread anterior
+//            playerThread.stop();
+        }
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "5");
 
@@ -53,7 +62,7 @@ public class MusicPlayer{
         root.addElement("album").addText(song.album);
         root.addElement("genre").addText(song.genre);
 
-        Thread playerThread = new PlayerThread(document, chunk);
+        playerThread = new PlayerThread(document, chunk);
         playerThread.start();
     }
 

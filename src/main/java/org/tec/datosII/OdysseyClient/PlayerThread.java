@@ -1,11 +1,14 @@
 package org.tec.datosII.OdysseyClient;
 
+import com.Ostermiller.util.CircularByteBuffer;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.util.Base64;
 
 public class PlayerThread extends Thread {
@@ -31,13 +34,18 @@ public class PlayerThread extends Thread {
         ResponseHandler handler = client.send(request.getBytes());
 
         try {
-            System.out.println(handler.getStrResponse());
             Document response = handler.getXmlResponse();
-            String audio = response.getRootElement().elementIterator().next().getText();
-            ByteArrayInputStream stream = new ByteArrayInputStream(Base64.getDecoder().decode(audio));
+            String audio = response.getRootElement().elementIterator("content").next().getText();
 
-//            Thread streaming = new StreamThread(stream, this.request, chunkNumber, initialChunk + 1);
-//            streaming.start();
+            CircularByteBuffer buffer = new CircularByteBuffer(1638400);
+            buffer.getOutputStream().write(Base64.getDecoder().decode(audio));
+
+            InputStream stream = buffer.getInputStream();
+
+            int totalChunks = Integer.parseInt(response.getRootElement().elementIterator("chunks").next().getText());
+
+            Thread streaming = new StreamThread(buffer.getOutputStream(), this.request, chunkNumber, initialChunk + 1, totalChunks);
+            streaming.start();
 
             AudioInputStream in= AudioSystem.getAudioInputStream(stream);
             AudioInputStream din = null;
@@ -67,7 +75,7 @@ public class PlayerThread extends Thread {
             // Start
             line.start();
             int nBytesRead = 0, nBytesWritten = 0;
-            while (nBytesRead != -1)
+            while (nBytesRead != -1 && !this.isInterrupted())
             {
                 nBytesRead = din.read(data, 0, data.length);
                 if (nBytesRead != -1) nBytesWritten = line.write(data, 0, nBytesRead);
