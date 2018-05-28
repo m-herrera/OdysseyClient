@@ -170,8 +170,12 @@ public class MainWindowController {
     @FXML
     void playSong(MouseEvent event) {
         if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-            Metadata metadata = songList.getSelectionModel().getSelectedItem().getValue();
-            MusicPlayer.getInstance().play(metadata, 0);
+            TreeItem<Metadata> treeItem = songList.getSelectionModel().getSelectedItem();
+            if(treeItem == null){
+                return;
+            }
+
+            MusicPlayer.getInstance().play(treeItem.getValue(), 0);
         }
     }
 
