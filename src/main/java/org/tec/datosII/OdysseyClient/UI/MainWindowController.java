@@ -108,6 +108,8 @@ public class MainWindowController {
     int currentPage;
 
     ScrollBar scrollBar;
+
+    int currentlyPlaying;
     /**
      * Configuracion inicial de la vista
      */
@@ -146,6 +148,11 @@ public class MainWindowController {
         songList.getColumns().setAll(nameColumn,artistColumn,albumColumn,yearColumn, genreColumn);
 
         updateSongs();
+
+        songSlider.setMin(0);
+        songSlider.setMax(100);
+        songSlider.setValue(0);
+        MusicPlayer.getInstance().setSlider(songSlider);
     }
 
     /**
@@ -154,7 +161,8 @@ public class MainWindowController {
      */
     @FXML
     void nextSong(ActionEvent event) {
-
+        Metadata metadata = tableList.get(++currentlyPlaying);
+        MusicPlayer.getInstance().play(metadata, 0);
     }
 
     /**
@@ -163,6 +171,12 @@ public class MainWindowController {
      */
     @FXML
     void playPauseSong(ActionEvent event) {
+        MusicPlayer player = MusicPlayer.getInstance();
+        if(player.isPlaying()){
+            player.pause();
+        }else{
+            player.unpause();
+        }
 
     }
 
@@ -172,13 +186,16 @@ public class MainWindowController {
      */
     @FXML
     void playSong(MouseEvent event) {
+        System.out.println("Is playing before " + MusicPlayer.getInstance().isPlaying());
         if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+
             TreeItem<Metadata> treeItem = songList.getSelectionModel().getSelectedItem();
             if(treeItem == null){
                 return;
             }
-
             MusicPlayer.getInstance().play(treeItem.getValue(), 0);
+            currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
+            System.out.println("Is playing after " + MusicPlayer.getInstance().isPlaying());
         }
     }
 
@@ -188,7 +205,8 @@ public class MainWindowController {
      */
     @FXML
     void prevSong(ActionEvent event) {
-
+        Metadata metadata = tableList.get(--currentlyPlaying);
+        MusicPlayer.getInstance().play(metadata, 0);
     }
 
     /**

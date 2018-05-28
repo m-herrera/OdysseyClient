@@ -1,15 +1,8 @@
 package org.tec.datosII.OdysseyClient;
 
-import com.Ostermiller.util.CircularByteBuffer;
 import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.util.Base64;
 
@@ -17,8 +10,9 @@ public class StreamThread extends Thread {
     OutputStream stream;
     Document request;
     Element chunkNumber;
-    int chunk;
-    int totalChunks;
+    private int chunk;
+    private int totalChunks;
+    private boolean paused = false;
 
     public StreamThread(OutputStream stream, Document request, Element chunkNumber, int initialChunk, int totalChunks){
         this.stream = stream;
@@ -30,7 +24,7 @@ public class StreamThread extends Thread {
 
     @Override
     public void run(){
-        while(this.chunk < this.totalChunks) {
+        while(this.chunk < this.totalChunks && !paused) {
             this.chunkNumber.setText(String.valueOf(chunk));
 
             String request = this.request.asXML();
@@ -46,12 +40,25 @@ public class StreamThread extends Thread {
 
 
                 String audio = response.getRootElement().elementIterator("content").next().getText();
-                stream.write(Base64.getDecoder().decode(audio));
+
+                byte[] decodedAudio = Base64.getDecoder().decode(audio);
+                if(!paused) {
+                    stream.write(decodedAudio);
+                }
             }catch (Exception ex){
                 ex.printStackTrace();
             }
 
             chunk++;
         }
+    }
+
+    public int pause(){
+        this.paused = true;
+        return chunk;
+    }
+
+    public int getChunk(){
+        return chunk;
     }
 }

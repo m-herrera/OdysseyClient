@@ -1,5 +1,8 @@
 package org.tec.datosII.OdysseyClient;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.control.Slider;
 import javazoom.jl.player.Player;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -25,7 +28,13 @@ public class MusicPlayer{
     /**
      * Hilo unico del reproductor
      */
-    Thread playerThread;
+    PlayerThread playerThread;
+
+    int currentChunk;
+
+    Metadata currentSong;
+
+    Slider slider;
 
     /**
      * Constructor privado del reproductor
@@ -49,9 +58,9 @@ public class MusicPlayer{
      * @param chunk Bloque desde el cual reproducir la cancion
      */
     public void play(Metadata song, int chunk){
-        if(playerThread != null){
-            //Deberia detener el thread anterior
-//            playerThread.stop();
+        currentSong = song;
+        if(playerThread != null && playerThread.isAlive()){
+            pause();
         }
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "5");
@@ -63,7 +72,34 @@ public class MusicPlayer{
         root.addElement("genre").addText(song.genre);
 
         playerThread = new PlayerThread(document, chunk);
+        playerThread.currentPercent.addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                slider.adjustValue(newValue.doubleValue());
+            }
+        });
         playerThread.start();
     }
 
+    public void pause(){
+        currentChunk = playerThread.pause();
+    }
+
+    public void unpause(){
+        play(currentSong, currentChunk);
+    }
+
+
+
+    public boolean isPlaying() {
+        if(playerThread != null){
+            return playerThread.isAlive();
+        }else{
+            return false;
+        }
+    }
+
+    public void setSlider(Slider slider){
+        this.slider = slider;
+    }
 }
