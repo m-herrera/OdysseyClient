@@ -5,6 +5,7 @@ import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,10 +13,9 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
@@ -105,6 +105,9 @@ public class MainWindowController {
      */
     private JFXTreeTableColumn<Metadata, String> genreColumn = new JFXTreeTableColumn<>("Genre");
 
+    int currentPage;
+
+    ScrollBar scrollBar;
     /**
      * Configuracion inicial de la vista
      */
@@ -194,7 +197,33 @@ public class MainWindowController {
      */
     @FXML
     void scrollHandler(ScrollEvent event) {
+        if(scrollBar == null){
+            scrollBar = getVerticalScrollbar(songList);
 
+            scrollBar.valueProperty().addListener(new ChangeListener<Number>() {
+                @Override
+                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                    if(newValue.doubleValue() == scrollBar.getMin() && currentPage != 1){
+                        currentPage--;
+                        tableList.removeAll(tablePages[2].songs);
+                        tablePages[2] = tablePages[1];
+                        tablePages[1] = tablePages[0];
+                        tablePages[0] = populateTable(currentPage - 1);
+                        tableList.addAll(0, tablePages[0].songs); // No funciona, anade al final
+                        songList.refresh();
+                    }
+                    if(newValue.doubleValue() == scrollBar.getMax() && tablePages[2].songs.size() == 10){
+                        currentPage++;
+                        tableList.removeAll(tablePages[0].songs);
+                        tablePages[0] = tablePages[1];
+                        tablePages[1] = tablePages[2];
+                        tablePages[2] = populateTable(currentPage + 1);
+                        tableList.addAll(tablePages[2].songs);
+                        songList.refresh();
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -315,6 +344,9 @@ public class MainWindowController {
      * @return TablePage con los datos de las canciones
      */
     private TablePage populateTable(int pageNumber){
+
+        System.out.println("Pidiendo pagina " + pageNumber);
+
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "4");
         root.addElement("sortBy").addText("name");
@@ -359,6 +391,7 @@ public class MainWindowController {
      */
     private void updateSongs(){
         tableList.clear();
+        currentPage = 1;
 
         tablePages[0] = populateTable(0);
         tableList.addAll(tablePages[0].songs);
@@ -368,6 +401,19 @@ public class MainWindowController {
 
         tablePages[2] = populateTable(2);
         tableList.addAll(tablePages[2].songs);
+    }
+
+    private ScrollBar getVerticalScrollbar(JFXTreeTableView<?> table) {
+        ScrollBar result = null;
+        for (Node n : table.lookupAll(".scroll-bar")) {
+            if (n instanceof ScrollBar) {
+                ScrollBar bar = (ScrollBar) n;
+                if (bar.getOrientation().equals(Orientation.VERTICAL)) {
+                    result = bar;
+                }
+            }
+        }
+        return result;
     }
 
 }
