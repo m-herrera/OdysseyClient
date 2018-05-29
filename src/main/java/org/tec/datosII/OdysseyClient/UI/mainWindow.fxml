@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
 <?import com.jfoenix.controls.JFXListView?>
 <?import com.jfoenix.controls.JFXSlider?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXToolbar?>
 <?import com.jfoenix.controls.JFXTreeTableView?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
@@ -42,7 +44,7 @@
                   </ImageView>
                </graphic>
             </JFXButton>
-            <JFXSlider fx:id="songSlider" onMouseReleased="#sliderChanged" prefHeight="54.0" prefWidth="1052.0" stylesheets="@mainStyles.css" />
+            <JFXSlider fx:id="songSlider" onMouseReleased="#sliderChanged" prefHeight="54.0" prefWidth="1052.0" stylesheets="@mainStyles.css" HBox.hgrow="ALWAYS" />
          </children></HBox>
    </bottom>
    <top>
@@ -69,7 +71,15 @@
                   </ImageView>
                </graphic>
             </JFXButton>
-         </left></JFXToolbar>
+         </left>
+         <center>
+            <HBox alignment="CENTER" prefWidth="665.0" spacing="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label text="Sort by:" />
+                  <JFXComboBox fx:id="sortCombo" onAction="#sort" prefHeight="27.0" prefWidth="103.0" />
+               </children>
+            </HBox>
+         </center></JFXToolbar>
    </top>
    <left>
       <JFXListView BorderPane.alignment="CENTER" />

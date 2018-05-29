@@ -20,6 +20,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
+import javafx.util.StringConverter;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -72,6 +73,9 @@ public class MainWindowController {
     @FXML
     private JFXTreeTableView<Metadata> songList;
 
+    @FXML
+    private JFXComboBox<SortConfig> sortCombo;
+
     /**
      * Columna con el nombre
      */
@@ -104,6 +108,11 @@ public class MainWindowController {
     ScrollBar scrollBar;
 
     int currentlyPlaying;
+
+    String sortBy = "name";
+
+    String sortWith = "quickSort";
+
     /**
      * Configuracion inicial de la vista
      */
@@ -158,6 +167,38 @@ public class MainWindowController {
         songSlider.setMax(100);
         songSlider.setValue(0);
         MusicPlayer.getInstance().setSlider(songSlider);
+
+        sortCombo.setCellFactory((sortCombo)->{
+            return new ListCell<SortConfig>(){
+                @Override
+                protected void updateItem(SortConfig item, boolean empty){
+                    super.updateItem(item, empty);
+                    if (item == null || empty) {
+                        setText(null);
+                    } else {
+                        setText(item.attribute.substring(0, 1).toUpperCase() + item.attribute.substring(1));
+                    }
+                }
+            };
+        });
+
+        sortCombo.setConverter(new StringConverter<SortConfig>() {
+            @Override
+            public String toString(SortConfig object) {
+                return object.attribute.substring(0, 1).toUpperCase() + object.attribute.substring(1);
+            }
+
+            @Override
+            public SortConfig fromString(String string) {
+                return null;
+            }
+        });
+
+        sortCombo.getItems().add(new SortConfig("name", "quickSort"));
+        sortCombo.getItems().add(new SortConfig("artist", "radixSort"));
+        sortCombo.getItems().add(new SortConfig("album", "bubbleSort"));
+
+        sortCombo.getSelectionModel().select(0);
     }
 
     @FXML
@@ -285,11 +326,10 @@ public class MainWindowController {
      */
     @FXML
     void sort(ActionEvent event) {
-
-        System.out.println(event.getEventType().getName());
-        Document request = DocumentHelper.createDocument();
-        Element root = request.addElement("request").addAttribute("opcode", "6");
-        root.addElement("search").setText("");
+        SortConfig config = sortCombo.getValue();
+        sortBy = config.attribute;
+        sortWith = config.algorithm;
+        updateSongs();
     }
 
     @FXML
@@ -411,8 +451,8 @@ public class MainWindowController {
     private TablePage populateTable(int pageNumber){
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "4");
-        root.addElement("sortBy").addText("name");
-        root.addElement("sortWith").addText("quickSort");
+        root.addElement("sortBy").addText(sortBy);
+        root.addElement("sortWith").addText(sortWith);
         root.addElement("page").addText(String.valueOf(pageNumber));
 
         NioClient client = NioClient.getInstance();
