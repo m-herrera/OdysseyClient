@@ -102,4 +102,9 @@ public class MusicPlayer{
     public void setSlider(Slider slider){
         this.slider = slider;
     }
+
+    public void forward(int slider){
+        int chunk = playerThread.getTotalChunks() * slider / 100;
+        play(currentSong, chunk);
+    }
 }

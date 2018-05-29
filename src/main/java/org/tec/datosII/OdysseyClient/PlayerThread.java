@@ -123,4 +123,8 @@ public class PlayerThread extends Thread {
         }
         return this.pausedChunk - 2;
     }
+
+    public int getTotalChunks(){
+        return totalChunks;
+    }
 }

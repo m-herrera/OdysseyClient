@@ -46,7 +46,6 @@ public class StreamThread extends Thread {
                     stream.write(decodedAudio);
                 }
             }catch (Exception ex){
-                ex.printStackTrace();
             }
 
             chunk++;

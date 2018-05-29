@@ -1,7 +1,9 @@
 package org.tec.datosII.OdysseyClient;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.tec.datosII.OdysseyClient.UI.LoginWindow;
 
 import java.net.InetAddress;
@@ -41,6 +43,8 @@ public class App extends Application {
 
         setRootStage(primaryStage);
         primaryStage.setTitle("Odissey");
+
+        primaryStage.setOnCloseRequest(event->{System.exit(0);});
 
         LoginWindow loginWindow = new LoginWindow();
 

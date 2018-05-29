@@ -3,8 +3,6 @@ package org.tec.datosII.OdysseyClient.UI;
 import com.jfoenix.controls.*;
 import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -16,27 +14,20 @@ import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
-import javazoom.jl.converter.Converter;
-import javazoom.jl.player.Player;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.tec.datosII.OdysseyClient.*;
-
 import javax.imageio.ImageIO;
-import javax.sound.sampled.*;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Base64;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -65,6 +56,9 @@ public class MainWindowController {
      */
     @FXML
     private JFXSlider songSlider;
+
+    @FXML
+    private JFXTextField searchTextfield;
 
     /**
      * Lista de amigos
@@ -115,26 +109,36 @@ public class MainWindowController {
      */
     @FXML
     private void initialize(){
+        nameColumn.prefWidthProperty().bind(songList.widthProperty().divide(4));
+        nameColumn.setStyle("-fx-alignment: CENTER;");
         nameColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
             ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().name);
             return property;
         });
 
+        artistColumn.prefWidthProperty().bind(songList.widthProperty().divide(5));
+        artistColumn.setStyle("-fx-alignment: CENTER;");
         artistColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
             ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().artist);
             return property;
         });
 
+        albumColumn.prefWidthProperty().bind(songList.widthProperty().divide(4));
+        albumColumn.setStyle("-fx-alignment: CENTER;");
         albumColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
             ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().album);
             return property;
         });
 
+        yearColumn.prefWidthProperty().bind(songList.widthProperty().divide(10));
+        yearColumn.setStyle("-fx-alignment: CENTER;");
         yearColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
             ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().year);
             return property;
         });
 
+        genreColumn.prefWidthProperty().bind(songList.widthProperty().divide(5.1));
+        genreColumn.setStyle("-fx-alignment: CENTER;");
         genreColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
             ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().genre);
             return property;
@@ -146,6 +150,7 @@ public class MainWindowController {
         songList.setShowRoot(false);
         songList.setEditable(false);
         songList.getColumns().setAll(nameColumn,artistColumn,albumColumn,yearColumn, genreColumn);
+        songList.setPlaceholder(new Label("Song library is empty. Click on Upload to add new songs."));
 
         updateSongs();
 
@@ -153,6 +158,38 @@ public class MainWindowController {
         songSlider.setMax(100);
         songSlider.setValue(0);
         MusicPlayer.getInstance().setSlider(songSlider);
+    }
+
+    @FXML
+    void search(ActionEvent event) {
+        if(searchTextfield.getText().isEmpty()) {
+            updateSongs();
+            return;
+        }
+        tableList.clear();
+        Document request = DocumentHelper.createDocument();
+        Element root = request.addElement("request").addAttribute("opcode", "6");
+        root.addElement("search").addText(searchTextfield.getText());
+
+        ResponseHandler searchHandler = NioClient.getInstance().send(request.asXML().getBytes());
+
+        System.out.println(searchHandler.getStrResponse());
+        try {
+            Document response = searchHandler.getXmlResponse();
+            Element responseRoot = response.getRootElement();
+            Element songs = responseRoot.elementIterator("songs").next();
+            for (Element song : songs.elements()) {
+                Metadata newSong = new Metadata();
+
+                newSong.name = song.elementIterator("name").next().getText();
+                newSong.album = song.elementIterator("album").next().getText();
+                newSong.artist = song.elementIterator("artist").next().getText();
+                newSong.lyrics = song.elementIterator("lyrics").next().getText();
+                tableList.add(newSong);
+            }
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -186,7 +223,6 @@ public class MainWindowController {
      */
     @FXML
     void playSong(MouseEvent event) {
-        System.out.println("Is playing before " + MusicPlayer.getInstance().isPlaying());
         if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
 
             TreeItem<Metadata> treeItem = songList.getSelectionModel().getSelectedItem();
@@ -195,7 +231,6 @@ public class MainWindowController {
             }
             MusicPlayer.getInstance().play(treeItem.getValue(), 0);
             currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
-            System.out.println("Is playing after " + MusicPlayer.getInstance().isPlaying());
         }
     }
 
@@ -251,6 +286,15 @@ public class MainWindowController {
     @FXML
     void sort(ActionEvent event) {
 
+        System.out.println(event.getEventType().getName());
+        Document request = DocumentHelper.createDocument();
+        Element root = request.addElement("request").addAttribute("opcode", "6");
+        root.addElement("search").setText("");
+    }
+
+    @FXML
+    void sliderChanged(MouseEvent event){
+        MusicPlayer.getInstance().forward((int) songSlider.getValue());
     }
 
     /**
@@ -345,7 +389,10 @@ public class MainWindowController {
                 try {
                     Metadata selected = songList.getSelectionModel().getSelectedItem().getValue();
                     PropertiesDialog dialog = new PropertiesDialog();
-                    dialog.showAndWait(selected);
+                    Metadata updated = dialog.showAndWait(selected);
+                    if(updated != null){
+                        System.out.println("Hacer request para actualizar");
+                    }
                 }catch (IOException ex){
                     ex.printStackTrace();
                 }
@@ -362,9 +409,6 @@ public class MainWindowController {
      * @return TablePage con los datos de las canciones
      */
     private TablePage populateTable(int pageNumber){
-
-        System.out.println("Pidiendo pagina " + pageNumber);
-
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "4");
         root.addElement("sortBy").addText("name");
@@ -374,8 +418,6 @@ public class MainWindowController {
         NioClient client = NioClient.getInstance();
         String request = document.asXML();
         ResponseHandler handler = client.send(request.getBytes());
-
-        System.out.println(handler.getStrResponse());
 
         TablePage page = null;
         try {
@@ -394,7 +436,8 @@ public class MainWindowController {
                 newSong.name = song.elementIterator("name").next().getText();
                 newSong.album = song.elementIterator("album").next().getText();
                 newSong.artist = song.elementIterator("artist").next().getText();
-                page.songs.addAll(newSong);
+                newSong.lyrics = song.elementIterator("lyrics").next().getText();
+                page.songs.add(newSong);
             }
         }catch(Exception ex){
             ex.printStackTrace();

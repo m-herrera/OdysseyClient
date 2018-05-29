@@ -66,7 +66,7 @@
                         <Font size="15.0" />
                      </font>
                   </Label>
-                  <JFXTextArea prefHeight="132.0" prefWidth="207.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <JFXTextArea fx:id="lyricsText" prefHeight="132.0" prefWidth="207.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                </children>
             </GridPane>
             <ImageView fx:id="coverArt" fitHeight="200.0" fitWidth="200.0" layoutX="348.0" onMouseClicked="#changeCoverArt" pickOnBounds="true" preserveRatio="true">
