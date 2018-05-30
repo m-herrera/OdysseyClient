@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.util.Base64;
 import java.util.stream.Stream;
 
+
 public class PlayerThread extends Thread {
     private Document request;
     private int initialChunk;
@@ -50,6 +51,7 @@ public class PlayerThread extends Thread {
                 String audio = response.getRootElement().elementIterator("content").next().getText();
 
                 CircularByteBuffer buffer = new CircularByteBuffer(bufferSize);
+
                 buffer.getOutputStream().write(Base64.getDecoder().decode(audio));
 
                 InputStream stream = buffer.getInputStream();
@@ -69,6 +71,7 @@ public class PlayerThread extends Thread {
                         baseFormat.getChannels() * 2,
                         baseFormat.getSampleRate(),
                         false);
+
                 din = AudioSystem.getAudioInputStream(decodedFormat, in);
                 // Play now.
                 rawplay(decodedFormat, din, streaming);
@@ -97,6 +100,16 @@ public class PlayerThread extends Thread {
             {
                 nBytesRead = din.read(data, 0, data.length);
                 if (nBytesRead != -1) nBytesWritten = line.write(data, 0, nBytesRead);
+                int amplitude = 0;
+                for (int j = 0; j < data.length; j = j +2 ){
+                    if (data[j] > data[j+1])
+                        amplitude = amplitude + data[j] - data[j+1];
+                    else amplitude = amplitude + data[j + 1] - data[j];
+
+                    System.out.println("Esta es la amplitud:" + amplitude);
+                }
+                amplitude = amplitude / data.length * 2;
+                System.out.println(amplitude);
                 currentPercent.setValue(100 * (stream.getChunk() - 2) / totalChunks);
             }
             // Stop
