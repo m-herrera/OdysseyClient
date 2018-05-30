@@ -209,29 +209,29 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
         try {
             Mp3File mp3File = new Mp3File(path);
             if(mp3File.hasId3v1Tag()){
-                System.out.println("Id3V1");
-
                 ID3v1 tag = mp3File.getId3v1Tag();
-                name = tag.getTitle();
-                artist = tag.getArtist();
-                year = tag.getYear();
-                album = tag.getAlbum();
-                genre = genres[tag.getGenre()];
+                name += tag.getTitle();
+                artist += tag.getArtist();
+                year += tag.getYear();
+                album += tag.getAlbum();
+                genre += genres[tag.getGenre()];
 
             }else if(mp3File.hasId3v2Tag()){
-                System.out.println("Id3V2");
                 ID3v2 tag = mp3File.getId3v2Tag();
-                name = tag.getTitle();
-                artist = tag.getArtist();
-                year = tag.getYear();
-                album = tag.getAlbum();
-                if(tag.getGenre() < genres.length) {
+                name += tag.getTitle();
+                artist += tag.getArtist();
+                year += tag.getYear();
+                album += tag.getAlbum();
+                int genreId = tag.getGenre();
+                if(genreId > -1 && genreId < genres.length) {
                     genre = genres[tag.getGenre()];
                 }else{
                     genre = "Unknown";
                 }
-                cover = new Image(new ByteArrayInputStream(tag.getAlbumImage()));
-
+                byte[] image = tag.getAlbumImage();
+                if(image != null) {
+                    cover = new Image(new ByteArrayInputStream(tag.getAlbumImage()));
+                }
             }else{
                 System.out.println("Other tag");
             }
