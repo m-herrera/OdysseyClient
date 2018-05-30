@@ -146,7 +146,7 @@ public class MainWindowController {
             return property;
         });
 
-        genreColumn.prefWidthProperty().bind(songList.widthProperty().divide(5.1));
+        genreColumn.prefWidthProperty().bind(songList.widthProperty().divide(6));
         genreColumn.setStyle("-fx-alignment: CENTER;");
         genreColumn.setCellValueFactory((TreeTableColumn.CellDataFeatures<Metadata, String> param) -> {
             ObservableValue<String> property = new ReadOnlyObjectWrapper<String>(param.getValue().getValue().genre);
@@ -411,7 +411,6 @@ public class MainWindowController {
 
         NioClient client = NioClient.getInstance();
         ResponseHandler handler = client.send(request.getBytes());
-        System.out.println(handler.getStrResponse());
 
     }
 
@@ -476,6 +475,8 @@ public class MainWindowController {
                 newSong.name = song.elementIterator("name").next().getText();
                 newSong.album = song.elementIterator("album").next().getText();
                 newSong.artist = song.elementIterator("artist").next().getText();
+                newSong.genre = song.elementIterator("genre").next().getText();
+                newSong.year = song.elementIterator("year").next().getText();
                 newSong.lyrics = song.elementIterator("lyrics").next().getText();
                 page.songs.add(newSong);
             }

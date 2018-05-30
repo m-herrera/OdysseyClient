@@ -7,6 +7,7 @@
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXToolbar?>
 <?import com.jfoenix.controls.JFXTreeTableView?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -45,7 +46,10 @@
                </graphic>
             </JFXButton>
             <JFXSlider fx:id="songSlider" onMouseReleased="#sliderChanged" prefHeight="54.0" prefWidth="1052.0" stylesheets="@mainStyles.css" HBox.hgrow="ALWAYS" />
-         </children></HBox>
+         </children>
+         <padding>
+            <Insets right="20.0" />
+         </padding></HBox>
    </bottom>
    <top>
       <JFXToolbar style="-fx-background-color: #F55B3B;" BorderPane.alignment="CENTER">

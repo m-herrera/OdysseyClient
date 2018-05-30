@@ -145,6 +145,13 @@ public class NioClient implements Runnable {
         while(true) {
             try {
                 numRead = socketChannel.read(this.readBuffer);
+                if (numRead == -1) {
+                    // Remote entity shut the socket down cleanly. Do the
+                    // same from our end and cancel the channel.
+                    key.channel().close();
+                    key.cancel();
+                    return;
+                }
                 totalRead += numRead;
                 byte[] rspData = new byte[numRead];
                 System.arraycopy(this.readBuffer.array(), 0, rspData, 0, numRead);
@@ -163,13 +170,6 @@ public class NioClient implements Runnable {
                 socketChannel.close();
                 return;
             }
-        }
-        if (numRead == -1) {
-            // Remote entity shut the socket down cleanly. Do the
-            // same from our end and cancel the channel.
-            key.channel().close();
-            key.cancel();
-            return;
         }
         // Handle the response
         this.handleResponse(socketChannel, response.getBytes(), totalRead);
