@@ -76,6 +76,15 @@ public class MainWindowController {
     @FXML
     private JFXComboBox<SortConfig> sortCombo;
 
+    @FXML
+    private JFXTextField beforeGuess;
+
+    @FXML
+    private Label guessingAnswer;
+
+    @FXML
+    private JFXTextField afterGuess;
+
     /**
      * Columna con el nombre
      */
@@ -225,6 +234,8 @@ public class MainWindowController {
                 newSong.name = song.elementIterator("name").next().getText();
                 newSong.album = song.elementIterator("album").next().getText();
                 newSong.artist = song.elementIterator("artist").next().getText();
+                newSong.genre = song.elementIterator("genre").next().getText();
+                newSong.year = song.elementIterator("year").next().getText();
                 newSong.lyrics = song.elementIterator("lyrics").next().getText();
                 tableList.add(newSong);
             }
@@ -240,6 +251,7 @@ public class MainWindowController {
     @FXML
     void nextSong(ActionEvent event) {
         Metadata metadata = tableList.get(++currentlyPlaying);
+        songList.getSelectionModel().select(currentlyPlaying);
         MusicPlayer.getInstance().play(metadata, 0);
     }
 
@@ -282,6 +294,7 @@ public class MainWindowController {
     @FXML
     void prevSong(ActionEvent event) {
         Metadata metadata = tableList.get(--currentlyPlaying);
+        songList.getSelectionModel().select(currentlyPlaying);
         MusicPlayer.getInstance().play(metadata, 0);
     }
 
@@ -349,6 +362,7 @@ public class MainWindowController {
         browser.setTitle("Select songs to upload");
         List<File> files = browser.showOpenMultipleDialog(App.getRootStage());
         if(files != null) {
+            MusicPlayer.getInstance().pause();
             for (File file : files) {
                 uploadToServer(file);
                 System.out.println(file.getName());
@@ -430,7 +444,38 @@ public class MainWindowController {
                     PropertiesDialog dialog = new PropertiesDialog();
                     Metadata updated = dialog.showAndWait(selected);
                     if(updated != null){
-                        System.out.println("Hacer request para actualizar");
+                        Document document = DocumentHelper.createDocument();
+                        Element root = document.addElement("request").addAttribute("opcode", "9");
+                        root.addElement("name").addText(selected.name);
+                        root.addElement("artist").addText(selected.artist);
+                        root.addElement("year").addText(selected.year);
+                        root.addElement("genre").addText(selected.genre);
+                        root.addElement("lyrics").addText(selected.lyrics);
+                        root.addElement("newName").addText(updated.name);
+                        root.addElement("newArtist").addText(updated.artist);
+                        root.addElement("newYear").addText(updated.year);
+                        root.addElement("newAlbum").addText(updated.album);
+                        root.addElement("newGenre").addText(updated.genre);
+                        root.addElement("newLyrics").addText(updated.lyrics);
+                        Element cover = root.addElement("newCover");
+                        if(updated.cover != null) {
+                            String imageString = null;
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            ImageIO.write(SwingFXUtils.fromFXImage(updated.cover, null), "png", bos);
+                            byte[] imageBytes = bos.toByteArray();
+
+                            String encodedFile = Base64.getEncoder().encodeToString(imageBytes);
+                            cover.addText(encodedFile);
+
+                            bos.close();
+                        }
+
+                        String xmlRequest = document.asXML();
+                        System.out.println(xmlRequest);
+
+                        ResponseHandler handler = NioClient.getInstance().send(document.asXML().getBytes());
+                        System.out.println(handler.getStrResponse());
+                        updateSongs();
                     }
                 }catch (IOException ex){
                     ex.printStackTrace();
@@ -516,6 +561,47 @@ public class MainWindowController {
             }
         }
         return result;
+    }
+
+    @FXML
+    void startGuess(ActionEvent event) {
+        String before = beforeGuess.getText();
+        String after = afterGuess.getText();
+
+        Document request = DocumentHelper.createDocument();
+        Element root = request.addElement("request").addAttribute("opcode", "7");
+        root.addElement("left").addText(before);
+        root.addElement("right").addText(after);
+
+        ResponseHandler handler = NioClient.getInstance().send(request.asXML().getBytes());
+
+        try {
+            Document response = handler.getXmlResponse();
+            System.out.println(handler.getStrResponse());
+
+        }catch (Exception ex){}
+
+    }
+
+    @FXML
+    void closeGuess(ActionEvent event) {
+
+    }
+
+    @FXML
+    void farGuess(ActionEvent event) {
+
+    }
+
+    @FXML
+    void maybeGuess(ActionEvent event) {
+
+    }
+
+    @FXML
+    void rightGuess(ActionEvent event) {
+        searchTextfield.setText("valor");
+        search(new ActionEvent());
     }
 
 }
