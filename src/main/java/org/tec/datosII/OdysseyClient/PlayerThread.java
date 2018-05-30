@@ -41,37 +41,43 @@ public class PlayerThread extends Thread {
         NioClient client = NioClient.getInstance();
         ResponseHandler handler = client.send(request.getBytes());
 
+        System.out.println(handler.getStrResponse());
+
         try {
             Document response = handler.getXmlResponse();
 
-            String audio = response.getRootElement().elementIterator("content").next().getText();
+            if(response.getRootElement().elementIterator("error").next().getText().equals("false")) {
+                String audio = response.getRootElement().elementIterator("content").next().getText();
 
-            CircularByteBuffer buffer = new CircularByteBuffer(bufferSize);
-            buffer.getOutputStream().write(Base64.getDecoder().decode(audio));
+                CircularByteBuffer buffer = new CircularByteBuffer(bufferSize);
+                buffer.getOutputStream().write(Base64.getDecoder().decode(audio));
 
-            InputStream stream = buffer.getInputStream();
+                InputStream stream = buffer.getInputStream();
 
-            totalChunks = Integer.parseInt(response.getRootElement().elementIterator("chunks").next().getText());
+                totalChunks = Integer.parseInt(response.getRootElement().elementIterator("chunks").next().getText());
 
-            StreamThread streaming = new StreamThread(buffer.getOutputStream(), this.request, chunkNumber, initialChunk + 1, totalChunks);
-            streaming.start();
+                StreamThread streaming = new StreamThread(buffer.getOutputStream(), this.request, chunkNumber, initialChunk + 1, totalChunks);
+                streaming.start();
 
-            AudioInputStream in= AudioSystem.getAudioInputStream(stream);
-            AudioInputStream din = null;
-            AudioFormat baseFormat = in.getFormat();
-            AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
-                    baseFormat.getSampleRate(),
-                    16,
-                    baseFormat.getChannels(),
-                    baseFormat.getChannels() * 2,
-                    baseFormat.getSampleRate(),
-                    false);
-            din = AudioSystem.getAudioInputStream(decodedFormat, in);
-            // Play now.
-            rawplay(decodedFormat, din, streaming);
-            in.close();
+                AudioInputStream in = AudioSystem.getAudioInputStream(stream);
+                AudioInputStream din = null;
+                AudioFormat baseFormat = in.getFormat();
+                AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
+                        baseFormat.getSampleRate(),
+                        16,
+                        baseFormat.getChannels(),
+                        baseFormat.getChannels() * 2,
+                        baseFormat.getSampleRate(),
+                        false);
+                din = AudioSystem.getAudioInputStream(decodedFormat, in);
+                // Play now.
+                rawplay(decodedFormat, din, streaming);
+                in.close();
 
-            this.pausedChunk = streaming.pause();
+                this.pausedChunk = streaming.pause();
+            }else{
+                System.out.println("Cancion no encontrada");
+            }
 
         } catch (Exception e)
         {
