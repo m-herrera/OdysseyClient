@@ -20,6 +20,7 @@ public class PlayerThread extends Thread {
     private int pausedChunk;
     private int bufferSize = 983040;
     private int totalChunks;
+    private double amplitude = 0;
 
 
     public DoubleProperty currentPercent = new SimpleDoubleProperty(0);
@@ -100,17 +101,14 @@ public class PlayerThread extends Thread {
             {
                 nBytesRead = din.read(data, 0, data.length);
                 if (nBytesRead != -1) nBytesWritten = line.write(data, 0, nBytesRead);
-                int amplitude = 0;
+                amplitude = 0;
                 for (int j = 0; j < data.length; j = j +2 ){
                     if (data[j] > data[j+1])
                         amplitude = amplitude + data[j] - data[j+1];
                     else amplitude = amplitude + data[j + 1] - data[j];
-
-                    System.out.println("Esta es la amplitud:" + amplitude);
                 }
                 amplitude = amplitude / data.length * 2;
-                System.out.println(amplitude);
-                currentPercent.setValue(100 * (stream.getChunk() - 2) / totalChunks);
+                currentPercent.setValue(100 * (stream.getChunk() - 2) / (totalChunks - 2));
             }
             // Stop
             line.drain();
@@ -143,5 +141,9 @@ public class PlayerThread extends Thread {
 
     public int getTotalChunks(){
         return totalChunks;
+    }
+
+    public double getAmplitude(){
+        return amplitude;
     }
 }

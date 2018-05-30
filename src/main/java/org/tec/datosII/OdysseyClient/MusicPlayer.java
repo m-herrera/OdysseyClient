@@ -101,6 +101,10 @@ public class MusicPlayer{
         }
     }
 
+    public boolean isPaused(){
+        return currentSong != null;
+    }
+
     public void setSlider(Slider slider){
         this.slider = slider;
     }
@@ -108,5 +112,13 @@ public class MusicPlayer{
     public void forward(int slider){
         int chunk = playerThread.getTotalChunks() * slider / 100;
         play(currentSong, chunk);
+    }
+
+    public double getAmplitude(){
+        if(this.playerThread != null){
+            return playerThread.getAmplitude();
+        }else{
+            return -1;
+        }
     }
 }

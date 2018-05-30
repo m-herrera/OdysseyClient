@@ -29,8 +29,6 @@ public class StreamThread extends Thread {
 
             String request = this.request.asXML();
 
-            System.out.println(request);
-
             NioClient client = NioClient.getInstance();
             ResponseHandler handler = client.send(request.getBytes());
 

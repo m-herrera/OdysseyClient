@@ -6,6 +6,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -14,12 +15,14 @@ import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
+import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -28,6 +31,7 @@ import org.tec.datosII.OdysseyClient.*;
 import javax.imageio.ImageIO;
 import java.io.*;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -122,6 +126,9 @@ public class MainWindowController {
 
     String sortWith = "quickSort";
 
+    @FXML
+    private JFXProgressBar volumeVisualizer;
+
     /**
      * Configuracion inicial de la vista
      */
@@ -208,6 +215,44 @@ public class MainWindowController {
         sortCombo.getItems().add(new SortConfig("album", "bubbleSort"));
 
         sortCombo.getSelectionModel().select(0);
+
+        VisualizerThread visualizer = new VisualizerThread(MusicPlayer.getInstance(), volumeVisualizer);
+        visualizer.start();
+
+        songList.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
+            @Override
+            public void onChanged(Change<? extends Node> c) {
+                if(scrollBar == null){
+                    scrollBar = getVerticalScrollbar(songList);
+
+                    scrollBar.valueProperty().addListener(new ChangeListener<Number>() {
+                        @Override
+                        public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+//                    if(newValue.doubleValue() == scrollBar.getMin() && currentPage != 1){
+//                        currentPage--;
+//                        tableList.removeAll(tablePages[2].songs);
+//                        tablePages[2] = tablePages[1];
+//                        tablePages[1] = tablePages[0];
+//                        tablePages[0] = populateTable(currentPage - 1);
+//                        tableList.addAll(0, tablePages[0].songs); // No funciona, anade al final
+//                        songList.refresh();
+//                    }
+                            if(newValue.doubleValue() == scrollBar.getMax() && tablePages[2].songs.size() == 10){
+                                double oldMax = scrollBar.getMax();
+                                currentPage++;
+//                        tableList.removeAll(tablePages[0].songs);
+                                tablePages[0] = tablePages[1];
+                                tablePages[1] = tablePages[2];
+                                tablePages[2] = populateTable(currentPage + 1);
+                                tableList.addAll(tablePages[2].songs);
+                                songList.refresh();
+                                scrollBar.setValue(oldMax);
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @FXML
@@ -264,8 +309,18 @@ public class MainWindowController {
         MusicPlayer player = MusicPlayer.getInstance();
         if(player.isPlaying()){
             player.pause();
-        }else{
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/play.png"));
+        }else if(player.isPaused()){
             player.unpause();
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+        }else{
+            TreeItem<Metadata> treeItem = songList.getSelectionModel().getSelectedItem();
+            if(treeItem == null){
+                return;
+            }
+            MusicPlayer.getInstance().play(treeItem.getValue(), 0);
+            currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
         }
 
     }
@@ -284,6 +339,7 @@ public class MainWindowController {
             }
             MusicPlayer.getInstance().play(treeItem.getValue(), 0);
             currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
         }
     }
 
@@ -304,33 +360,7 @@ public class MainWindowController {
      */
     @FXML
     void scrollHandler(ScrollEvent event) {
-        if(scrollBar == null){
-            scrollBar = getVerticalScrollbar(songList);
 
-            scrollBar.valueProperty().addListener(new ChangeListener<Number>() {
-                @Override
-                public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                    if(newValue.doubleValue() == scrollBar.getMin() && currentPage != 1){
-                        currentPage--;
-                        tableList.removeAll(tablePages[2].songs);
-                        tablePages[2] = tablePages[1];
-                        tablePages[1] = tablePages[0];
-                        tablePages[0] = populateTable(currentPage - 1);
-                        tableList.addAll(0, tablePages[0].songs); // No funciona, anade al final
-                        songList.refresh();
-                    }
-                    if(newValue.doubleValue() == scrollBar.getMax() && tablePages[2].songs.size() == 10){
-                        currentPage++;
-                        tableList.removeAll(tablePages[0].songs);
-                        tablePages[0] = tablePages[1];
-                        tablePages[1] = tablePages[2];
-                        tablePages[2] = populateTable(currentPage + 1);
-                        tableList.addAll(tablePages[2].songs);
-                        songList.refresh();
-                    }
-                }
-            });
-        }
     }
 
     /**
@@ -348,6 +378,7 @@ public class MainWindowController {
     @FXML
     void sliderChanged(MouseEvent event){
         MusicPlayer.getInstance().forward((int) songSlider.getValue());
+        playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
     }
 
     /**
@@ -448,6 +479,7 @@ public class MainWindowController {
                         Element root = document.addElement("request").addAttribute("opcode", "9");
                         root.addElement("name").addText(selected.name);
                         root.addElement("artist").addText(selected.artist);
+                        root.addElement("album").addText(selected.album);
                         root.addElement("year").addText(selected.year);
                         root.addElement("genre").addText(selected.genre);
                         root.addElement("lyrics").addText(selected.lyrics);
@@ -483,7 +515,31 @@ public class MainWindowController {
             }
         });
 
+        MenuItem delete = new MenuItem("Delete");
+        delete.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Document document = DocumentHelper.createDocument();
+                Element root = document.addElement("request").addAttribute("opcode", "8");
+
+                Metadata song = songList.getSelectionModel().getSelectedItem().getValue();
+
+                root.addElement("name").addText(song.name);
+                root.addElement("artist").addText(song.artist);
+                root.addElement("year").addText(song.year);
+                root.addElement("album").addText(song.album);
+                root.addElement("genre").addText(song.genre);
+
+                NioClient.getInstance().send(document.asXML().getBytes());
+
+                updateSongs();
+            }
+        });
+
+        altMenu.getItems().add(delete);
+
         altMenu.getItems().add(properties);
+
         altMenu.show(App.getRootStage(), event.getScreenX(), event.getScreenY());
     }
 
@@ -575,32 +631,53 @@ public class MainWindowController {
 
         ResponseHandler handler = NioClient.getInstance().send(request.asXML().getBytes());
 
+        System.out.println(handler.getStrResponse());
+
         try {
             Document response = handler.getXmlResponse();
-            System.out.println(handler.getStrResponse());
+            Element words = response.getRootElement().elementIterator("words").next();
 
+            List<String> population = new ArrayList<>(Integer.parseInt(response.getRootElement().elementIterator("numberOfWords").next().getText()));
+            for(Element word: words.elements()){
+                population.add(word.getText());
+            }
+
+            LyricsGuessing.population = population;
+
+            if(population.size() > 0) {
+                guessingAnswer.setText(population.get(0));
+            }
         }catch (Exception ex){}
 
     }
 
     @FXML
     void closeGuess(ActionEvent event) {
-
+        LyricsGuessing.evolve(guessingAnswer.getText(), 1, 1);
+        if(LyricsGuessing.population.size() > 0) {
+            guessingAnswer.setText(LyricsGuessing.population.get(0));
+        }
     }
 
     @FXML
     void farGuess(ActionEvent event) {
-
+        LyricsGuessing.evolve(guessingAnswer.getText(), -1, 1);
+        if(LyricsGuessing.population.size() > 0) {
+            guessingAnswer.setText(LyricsGuessing.population.get(0));
+        }
     }
 
     @FXML
     void maybeGuess(ActionEvent event) {
-
+        LyricsGuessing.evolve(guessingAnswer.getText(), 0, 1);
+        if(LyricsGuessing.population.size() > 0) {
+            guessingAnswer.setText(LyricsGuessing.population.get(0));
+        }
     }
 
     @FXML
     void rightGuess(ActionEvent event) {
-        searchTextfield.setText("valor");
+        searchTextfield.setText(guessingAnswer.getText());
         search(new ActionEvent());
     }
 

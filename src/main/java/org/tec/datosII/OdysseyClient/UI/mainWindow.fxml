@@ -3,6 +3,7 @@
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXComboBox?>
 <?import com.jfoenix.controls.JFXListView?>
+<?import com.jfoenix.controls.JFXProgressBar?>
 <?import com.jfoenix.controls.JFXSlider?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXToolbar?>
@@ -87,7 +88,15 @@
          </center></JFXToolbar>
    </top>
    <right>
-      <JFXListView fx:id="friendsList" BorderPane.alignment="CENTER" />
+      <VBox alignment="TOP_CENTER" prefHeight="574.0" prefWidth="200.0" spacing="60.0" BorderPane.alignment="CENTER">
+         <children>
+            <JFXListView fx:id="friendsList" prefHeight="419.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+            <JFXProgressBar fx:id="volumeVisualizer" prefHeight="116.0" prefWidth="199.0" progress="0.0" rotate="-90.0" />
+         </children>
+         <padding>
+            <Insets bottom="60.0" />
+         </padding>
+      </VBox>
    </right>
    <center>
       <JFXTreeTableView fx:id="songList" minHeight="200.0" minWidth="300.0" onContextMenuRequested="#contextMenu" onMouseClicked="#playSong" onScroll="#scrollHandler" onSort="#sort" showRoot="false" BorderPane.alignment="CENTER" />
@@ -97,13 +106,13 @@
          <children>
             <Label text="Lyrics Guessing" />
             <JFXTextField fx:id="beforeGuess" promptText="Before" />
-            <Label fx:id="guessingAnswer" prefHeight="31.0" prefWidth="160.0" textAlignment="CENTER" />
+            <Label fx:id="guessingAnswer" prefHeight="100.0" prefWidth="194.0" textAlignment="CENTER" />
             <JFXTextField fx:id="afterGuess" promptText="After" />
-            <JFXButton onAction="#startGuess" style="-fx-background-color: #F55B3B;" text="Start search" />
-            <JFXButton onAction="#rightGuess" style="-fx-background-color: #F55B3B;" text="That's right" />
-            <JFXButton onAction="#closeGuess" style="-fx-background-color: #F55B3B;" text="Seems like it" />
-            <JFXButton onAction="#maybeGuess" style="-fx-background-color: #F55B3B;" text="Maybe" />
-            <JFXButton onAction="#farGuess" style="-fx-background-color: #F55B3B;" text="I don't think so" />
+            <JFXButton onAction="#startGuess" prefWidth="150.0" style="-fx-background-color: #F55B3B;" text="Start search" />
+            <JFXButton onAction="#rightGuess" prefWidth="150.0" style="-fx-background-color: #F55B3B;" text="That's right" />
+            <JFXButton onAction="#closeGuess" prefWidth="150.0" style="-fx-background-color: #F55B3B;" text="Seems like it" />
+            <JFXButton onAction="#maybeGuess" prefWidth="150.0" style="-fx-background-color: #F55B3B;" text="Maybe" />
+            <JFXButton onAction="#farGuess" prefWidth="150.0" style="-fx-background-color: #F55B3B;" text="I don't think so" />
          </children>
          <padding>
             <Insets left="20.0" right="20.0" />
