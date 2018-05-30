@@ -225,7 +225,11 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
                 artist = tag.getArtist();
                 year = tag.getYear();
                 album = tag.getAlbum();
-                genre = genres[tag.getGenre()];
+                if(tag.getGenre() < genres.length) {
+                    genre = genres[tag.getGenre()];
+                }else{
+                    genre = "Unknown";
+                }
                 cover = new Image(new ByteArrayInputStream(tag.getAlbumImage()));
 
             }else{
