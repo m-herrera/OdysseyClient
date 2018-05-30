@@ -82,7 +82,9 @@ public class MusicPlayer{
     }
 
     public void pause(){
-        currentChunk = playerThread.pause();
+        if(playerThread != null) {
+            currentChunk = playerThread.pause();
+        }
     }
 
     public void unpause(){
