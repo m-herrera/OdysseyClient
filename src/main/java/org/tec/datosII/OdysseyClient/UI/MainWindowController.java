@@ -175,7 +175,7 @@ public class MainWindowController {
         songList.setShowRoot(false);
         songList.setEditable(false);
         songList.getColumns().setAll(nameColumn,artistColumn,albumColumn,yearColumn, genreColumn);
-        songList.setPlaceholder(new Label("Song library is empty. Click on Upload to add new songs."));
+        songList.setPlaceholder(new Label("Library is empty. Click on Upload to add new files."));
 
         updateSongs();
 
@@ -337,9 +337,19 @@ public class MainWindowController {
             if(treeItem == null){
                 return;
             }
-            MusicPlayer.getInstance().play(treeItem.getValue(), 0);
-            currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            Metadata metadata = treeItem.getValue();
+            if(metadata.type.equals("audio")) {
+                MusicPlayer.getInstance().play(treeItem.getValue(), 0);
+                currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
+                playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            }else if(metadata.type.equals("video")){
+                try {
+                    VideoWindow playerView = new VideoWindow();
+                    playerView.showAndWait(metadata);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
         }
     }
 
@@ -388,9 +398,11 @@ public class MainWindowController {
     @FXML
     void uploadSong(ActionEvent event){
         FileChooser browser = new FileChooser();
-        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Audio files", "*.mp3");
-        browser.getExtensionFilters().setAll(filter);
-        browser.setTitle("Select songs to upload");
+        FileChooser.ExtensionFilter audioFilter = new FileChooser.ExtensionFilter("Audio files", "*.mp3");
+        FileChooser.ExtensionFilter videoFilter = new FileChooser.ExtensionFilter("Video files", "*.mp4");
+        browser.getExtensionFilters().setAll(audioFilter);
+        browser.getExtensionFilters().setAll(videoFilter);
+        browser.setTitle("Select files to upload");
         List<File> files = browser.showOpenMultipleDialog(App.getRootStage());
         if(files != null) {
             MusicPlayer.getInstance().pause();
@@ -421,6 +433,7 @@ public class MainWindowController {
         root.addElement("album").addText(metadata.album);
         root.addElement("genre").addText(metadata.genre);
         root.addElement("lyrics").addText(metadata.lyrics);
+        root.addElement("type").addText(metadata.type);
 
         Element cover = root.addElement("cover");
         if(metadata.cover != null) {
@@ -579,6 +592,7 @@ public class MainWindowController {
                 newSong.genre = song.elementIterator("genre").next().getText();
                 newSong.year = song.elementIterator("year").next().getText();
                 newSong.lyrics = song.elementIterator("lyrics").next().getText();
+                newSong.type = song.elementIterator("type").next().getText();
                 page.songs.add(newSong);
             }
         }catch(Exception ex){

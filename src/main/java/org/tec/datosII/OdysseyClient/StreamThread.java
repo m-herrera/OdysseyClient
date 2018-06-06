@@ -37,11 +37,11 @@ public class StreamThread extends Thread {
                 Document response = handler.getXmlResponse();
 
 
-                String audio = response.getRootElement().elementIterator("content").next().getText();
+                String content = response.getRootElement().elementIterator("content").next().getText();
 
-                byte[] decodedAudio = Base64.getDecoder().decode(audio);
+                byte[] decoded = Base64.getDecoder().decode(content);
                 if(!paused) {
-                    stream.write(decodedAudio);
+                    stream.write(decoded);
                 }
             }catch (Exception ex){
             }

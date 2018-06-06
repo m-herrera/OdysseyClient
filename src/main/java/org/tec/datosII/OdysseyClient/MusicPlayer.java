@@ -3,18 +3,9 @@ package org.tec.datosII.OdysseyClient;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Slider;
-import javazoom.jl.player.Player;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-
-import javax.sound.sampled.*;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.util.Base64;
 
 /**
  * Reproductor de audio en streaming
@@ -28,7 +19,7 @@ public class MusicPlayer{
     /**
      * Hilo unico del reproductor
      */
-    PlayerThread playerThread;
+    AudioThread audioThread;
 
     int currentChunk;
 
@@ -59,7 +50,7 @@ public class MusicPlayer{
      */
     public void play(Metadata song, int chunk){
         currentSong = song;
-        if(playerThread != null && playerThread.isAlive()){
+        if(audioThread != null && audioThread.isAlive()){
             pause();
         }
         Document document = DocumentHelper.createDocument();
@@ -71,19 +62,19 @@ public class MusicPlayer{
         root.addElement("album").addText(song.album);
         root.addElement("genre").addText(song.genre);
 
-        playerThread = new PlayerThread(document, chunk);
-        playerThread.currentPercent.addListener(new ChangeListener<Number>() {
+        audioThread = new AudioThread(document, chunk);
+        audioThread.currentPercent.addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 slider.adjustValue(newValue.doubleValue());
             }
         });
-        playerThread.start();
+        audioThread.start();
     }
 
     public void pause(){
-        if(playerThread != null) {
-            currentChunk = playerThread.pause();
+        if(audioThread != null) {
+            currentChunk = audioThread.pause();
         }
     }
 
@@ -94,8 +85,8 @@ public class MusicPlayer{
 
 
     public boolean isPlaying() {
-        if(playerThread != null){
-            return playerThread.isAlive();
+        if(audioThread != null){
+            return audioThread.isAlive();
         }else{
             return false;
         }
@@ -110,13 +101,13 @@ public class MusicPlayer{
     }
 
     public void forward(int slider){
-        int chunk = playerThread.getTotalChunks() * slider / 100;
+        int chunk = audioThread.getTotalChunks() * slider / 100;
         play(currentSong, chunk);
     }
 
     public double getAmplitude(){
-        if(this.playerThread != null){
-            return playerThread.getAmplitude();
+        if(this.audioThread != null){
+            return audioThread.getAmplitude();
         }else{
             return -1;
         }

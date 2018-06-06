@@ -13,7 +13,7 @@ import java.util.Base64;
 import java.util.stream.Stream;
 
 
-public class PlayerThread extends Thread {
+public class AudioThread extends Thread {
     private Document request;
     private int initialChunk;
     private boolean paused = true;
@@ -25,7 +25,7 @@ public class PlayerThread extends Thread {
 
     public DoubleProperty currentPercent = new SimpleDoubleProperty(0);
 
-    public PlayerThread(Document request, int initialChunk){
+    public AudioThread(Document request, int initialChunk){
         this.request = request;
         this.initialChunk = initialChunk;
     }
