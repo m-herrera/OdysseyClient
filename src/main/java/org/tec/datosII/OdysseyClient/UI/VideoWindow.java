@@ -1,10 +1,12 @@
 package org.tec.datosII.OdysseyClient.UI;
 
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.tec.datosII.OdysseyClient.App;
 import org.tec.datosII.OdysseyClient.Metadata;
 import org.tec.datosII.OdysseyClient.UI.PropertiesDialogController;
@@ -16,6 +18,8 @@ public class VideoWindow {
      * Stage de la ventana
      */
     private Stage videoPlayer;
+
+    private VideoPlayerController controller;
 
     /**
      * Loader de la ventana
@@ -32,6 +36,12 @@ public class VideoWindow {
         videoPlayer = new Stage();
         videoPlayer.initOwner(App.getRootStage());
         videoPlayer.initModality(Modality.WINDOW_MODAL);
+        videoPlayer.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                controller.stop();
+            }
+        });
 
         Parent window = loader.load();
 
@@ -46,7 +56,7 @@ public class VideoWindow {
      * @param metadata Metadata del video a cargar
      */
     public void showAndWait(Metadata metadata){
-        PropertiesDialogController controller = loader.getController();
+        controller = loader.getController();
         controller.load(metadata);
         videoPlayer.showAndWait();
     }

@@ -207,42 +207,47 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
      * @param path Direccion de la cancion en disco
      */
     public Metadata(String path){
-        try {
-            Mp3File mp3File = new Mp3File(path);
-            if(mp3File.hasId3v1Tag()){
-                ID3v1 tag = mp3File.getId3v1Tag();
-                name += tag.getTitle();
-                artist += tag.getArtist();
-                year += tag.getYear();
-                album += tag.getAlbum();
-                genre += genres[tag.getGenre()];
-                type = "audio";
+        if(path.endsWith(".mp3")){
+            try {
+                Mp3File mp3File = new Mp3File(path);
+                if (mp3File.hasId3v1Tag()) {
+                    ID3v1 tag = mp3File.getId3v1Tag();
+                    name += tag.getTitle();
+                    artist += tag.getArtist();
+                    year += tag.getYear();
+                    album += tag.getAlbum();
+                    genre += genres[tag.getGenre()];
+                    type = "audio";
 
-            }else if(mp3File.hasId3v2Tag()){
-                ID3v2 tag = mp3File.getId3v2Tag();
-                name += tag.getTitle();
-                artist += tag.getArtist();
-                year += tag.getYear();
-                album += tag.getAlbum();
-                int genreId = tag.getGenre();
-                if(genreId > -1 && genreId < genres.length) {
-                    genre = genres[tag.getGenre()];
-                }else{
-                    genre = "Unknown";
-                }
-                byte[] image = tag.getAlbumImage();
-                if(image != null) {
-                    cover = new Image(new ByteArrayInputStream(tag.getAlbumImage()));
-                }
-                type = "audio";
+                } else if (mp3File.hasId3v2Tag()) {
+                    ID3v2 tag = mp3File.getId3v2Tag();
+                    name += tag.getTitle();
+                    artist += tag.getArtist();
+                    year += tag.getYear();
+                    album += tag.getAlbum();
+                    int genreId = tag.getGenre();
+                    if (genreId > -1 && genreId < genres.length) {
+                        genre = genres[tag.getGenre()];
+                    } else {
+                        genre = "Unknown";
+                    }
+                    byte[] image = tag.getAlbumImage();
+                    if (image != null) {
+                        cover = new Image(new ByteArrayInputStream(tag.getAlbumImage()));
+                    }
+                    type = "audio";
 
-            }else{
-                System.out.println("Other tag");
+                } else {
+                    System.out.println("Other tag");
+                }
+            } catch (Exception ex) {
             }
 
+            addLyrics();
 
-        }catch (Exception ex){
+        }else if(path.endsWith(".mp4")){
             type = "video";
+            name += new File(path).getName();
         }
     }
 
