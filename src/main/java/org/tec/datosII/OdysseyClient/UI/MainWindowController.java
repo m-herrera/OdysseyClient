@@ -32,6 +32,7 @@ import javax.imageio.ImageIO;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -422,8 +423,6 @@ public class MainWindowController {
 
         Metadata metadata = new Metadata(file.toPath().toString());
 
-        metadata.addLyrics();
-
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "3");
 
@@ -457,19 +456,34 @@ public class MainWindowController {
         Element content = root.addElement("content");
 
         try {
-            byte[] binaryFile = Files.readAllBytes(file.toPath());
+            ByteArrayInputStream binaryFile = new ByteArrayInputStream(Files.readAllBytes(file.toPath()));
 
-            String encodedFile = Base64.getEncoder().encodeToString(binaryFile);
-            content.addText(encodedFile);
+            int bufSize = 10485760;
+            byte[] binaryChunk = new byte[bufSize];
+            int readData;
+
+            Element chunk = root.addElement("chunk");
+            root.addElement("totalChunks").addText(String.valueOf(binaryFile.available() / bufSize));
+
+            int currentChunk = 0;
+
+            while(binaryFile.available() > 0) {
+                readData = binaryFile.read(binaryChunk, 0, binaryChunk.length);
+
+                String encodedFile = Base64.getEncoder().encodeToString(Arrays.copyOf(binaryChunk, readData));
+                content.setText(encodedFile);
+                chunk.setText(String.valueOf(currentChunk));
+                String request = document.asXML();
+
+                NioClient client = NioClient.getInstance();
+                ResponseHandler handler = client.send(request.getBytes());
+                handler.getStrResponse();
+
+                currentChunk++;
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
-
-        String request = document.asXML();
-
-        NioClient client = NioClient.getInstance();
-        ResponseHandler handler = client.send(request.getBytes());
-
     }
 
     /**
