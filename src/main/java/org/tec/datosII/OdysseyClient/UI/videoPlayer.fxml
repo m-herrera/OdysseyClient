@@ -7,9 +7,9 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.media.MediaView?>
+<?import javafx.scene.layout.Pane?>
 
-<BorderPane id="mainWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="240.0" minWidth="480.0" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: WHITE;" xmlns="http://javafx.com/javafx/9.0.4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tec.datosII.OdysseyClient.UI.VideoPlayerController">
+<BorderPane id="mainWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="240.0" minWidth="480.0" prefHeight="760.0" prefWidth="1280.0" style="-fx-background-color: WHITE;" xmlns="http://javafx.com/javafx/9.0.4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tec.datosII.OdysseyClient.UI.VideoPlayerController">
    <bottom>
       <HBox prefHeight="40.0" prefWidth="1280.0" BorderPane.alignment="CENTER">
          <children>
@@ -40,17 +40,13 @@
                   </ImageView>
                </graphic>
             </JFXButton>
-            <JFXSlider fx:id="songSlider" onMouseReleased="#sliderChanged" prefHeight="54.0" prefWidth="1052.0" stylesheets="@mainStyles.css" HBox.hgrow="ALWAYS" />
+            <JFXSlider fx:id="slider" onMouseReleased="#sliderChanged" prefHeight="54.0" prefWidth="1052.0" stylesheets="@mainStyles.css" HBox.hgrow="ALWAYS" />
          </children>
          <padding>
             <Insets right="20.0" />
          </padding></HBox>
    </bottom>
    <center>
-      <MediaView fx:id="videoView" fitHeight="680.0" fitWidth="1280.0" BorderPane.alignment="CENTER">
-         <BorderPane.margin>
-            <Insets />
-         </BorderPane.margin>
-      </MediaView>
+      <Pane fx:id="videoView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>

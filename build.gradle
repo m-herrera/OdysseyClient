@@ -17,4 +17,5 @@ dependencies {
     compile 'javazoom:jlayer:1.0.1'
     compile 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
     compile 'org.ostermiller:utils:1.07.00'
+    compile 'uk.co.caprica:vlcj:3.10.1'
 }
