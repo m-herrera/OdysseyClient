@@ -43,8 +43,6 @@ public class AudioThread extends Thread {
         NioClient client = NioClient.getInstance();
         ResponseHandler handler = client.send(request.getBytes());
 
-        System.out.println(handler.getStrResponse());
-
         try {
             Document response = handler.getXmlResponse();
 

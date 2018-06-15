@@ -401,8 +401,8 @@ public class MainWindowController {
         FileChooser browser = new FileChooser();
         FileChooser.ExtensionFilter audioFilter = new FileChooser.ExtensionFilter("Audio files", "*.mp3");
         FileChooser.ExtensionFilter videoFilter = new FileChooser.ExtensionFilter("Video files", "*.mp4");
-        browser.getExtensionFilters().setAll(audioFilter);
-        browser.getExtensionFilters().setAll(videoFilter);
+        browser.getExtensionFilters().add(audioFilter);
+        browser.getExtensionFilters().add(videoFilter);
         browser.setTitle("Select files to upload");
         List<File> files = browser.showOpenMultipleDialog(App.getRootStage());
         if(files != null) {
@@ -530,10 +530,8 @@ public class MainWindowController {
                         }
 
                         String xmlRequest = document.asXML();
-                        System.out.println(xmlRequest);
-
                         ResponseHandler handler = NioClient.getInstance().send(document.asXML().getBytes());
-                        System.out.println(handler.getStrResponse());
+                        handler.getStrResponse();
                         updateSongs();
                     }
                 }catch (IOException ex){
@@ -606,7 +604,9 @@ public class MainWindowController {
                 newSong.genre = song.elementIterator("genre").next().getText();
                 newSong.year = song.elementIterator("year").next().getText();
                 newSong.lyrics = song.elementIterator("lyrics").next().getText();
-                newSong.type = song.elementIterator("type").next().getText();
+//                newSong.type = song.elementIterator("type").next().getText();
+                newSong.type = "video";
+
                 page.songs.add(newSong);
             }
         }catch(Exception ex){

@@ -46,7 +46,9 @@ import uk.co.caprica.vlcj.player.direct.format.RV32BufferFormat;
 import uk.co.caprica.vlcj.player.media.Media;
 import uk.co.caprica.vlcj.player.media.callback.nonseekable.FileInputStreamMedia;
 import uk.co.caprica.vlcj.player.media.callback.nonseekable.NonSeekableInputStreamMedia;
+import uk.co.caprica.vlcj.player.media.callback.seekable.RandomAccessFileMedia;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -73,7 +75,7 @@ import java.nio.ByteBuffer;
  */
 public class ResizableJavaFXPlayerTest{
 
-    private static final String PATH_TO_VIDEO = "/Users/Jai/Desktop/test.mp4";
+//    private static final String PATH_TO_VIDEO = "/Users/Jai/Desktop/test.mp4";
 
     private ImageView imageView;
 
@@ -95,36 +97,30 @@ public class ResizableJavaFXPlayerTest{
         pixelFormat = PixelFormat.getByteBgraPreInstance();
         initializeImageView();
 
-        /*
-         *  Aqui hay que cambiar para que en lugar de un archivo reproduzca el stream
-         *
-         */
+        Media media = new NonSeekableInputStreamMedia() {
+            @Override
+            protected InputStream onOpenStream() throws IOException {
+                return stream;
+            }
 
-        mediaPlayerComponent.getMediaPlayer().prepareMedia(PATH_TO_VIDEO);
-//        mediaPlayerComponent.getMediaPlayer().prepareMedia(new NonSeekableInputStreamMedia() {
-//            @Override
-//            protected InputStream onOpenStream() throws IOException {
-//                return stream;
-//            }
-//
-//            @Override
-//            protected void onCloseStream(InputStream inputStream) throws IOException {
-//
-//            }
-//
-//            @Override
-//            protected long onGetSize() {
-//                try {
-//                    return stream.available();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                return 0;
-//            }
-//        });
-        mediaPlayerComponent.getMediaPlayer().start();
+            @Override
+            protected void onCloseStream(InputStream inputStream) throws IOException {
+                inputStream.close();
+            }
+
+            @Override
+            protected long onGetSize() {
+                try {
+                    return stream.available();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return 0;
+            }
+        };
 
 
+        mediaPlayerComponent.getMediaPlayer().playMedia(media);
     }
 
     private void initializeImageView() {
