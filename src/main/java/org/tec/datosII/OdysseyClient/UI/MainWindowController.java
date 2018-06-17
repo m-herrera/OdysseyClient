@@ -605,7 +605,7 @@ public class MainWindowController {
                 newSong.year = song.elementIterator("year").next().getText();
                 newSong.lyrics = song.elementIterator("lyrics").next().getText();
 //                newSong.type = song.elementIterator("type").next().getText();
-                newSong.type = "video";
+                newSong.type = "audio"; //"video";
 
                 page.songs.add(newSong);
             }

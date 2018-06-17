@@ -39,10 +39,7 @@ import uk.co.caprica.vlcj.player.direct.DefaultDirectMediaPlayer;
 import uk.co.caprica.vlcj.player.direct.DirectMediaPlayer;
 import uk.co.caprica.vlcj.player.direct.format.RV32BufferFormat;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.Base64;
@@ -58,6 +55,7 @@ public class VideoPlayerController {
     private int totalChunks;
     private double amplitude = 0;
     private boolean isPlaying = false;
+    private CircularByteBuffer buffer;
 
     ResizableJavaFXPlayerTest player;
 
@@ -80,14 +78,14 @@ public class VideoPlayerController {
     @FXML
     void playPause(ActionEvent event) {
         if(isPaused()){
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/play.png"));
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
             unpause();
         }else if(isPlaying()){
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/play.png"));
             pause();
         }else{
             playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
-            play(0);
+            play();
             isPlaying = true;
         }
     }
@@ -102,8 +100,10 @@ public class VideoPlayerController {
 
     }
 
+
     void load(Metadata video){
         this.video = video;
+        new Thread(()->{buffer(0);}).start();
     }
 
     void stop(){
@@ -111,10 +111,10 @@ public class VideoPlayerController {
     }
 
     /**
-     * Reproduce una video
+     * Descarga el video
      * @param chunk Bloque desde el cual reproducir la cancion
      */
-    void play(int chunk) {
+    void buffer(int chunk) {
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "5");
 
@@ -149,25 +149,14 @@ public class VideoPlayerController {
             if (response.getRootElement().elementIterator("error").next().getText().equals("false")) {
                 String video = response.getRootElement().elementIterator("content").next().getText();
 
-                CircularByteBuffer buffer = new CircularByteBuffer(bufferSize);
+                buffer = new CircularByteBuffer(bufferSize);
 
                 buffer.getOutputStream().write(Base64.getDecoder().decode(video));
-
-                InputStream stream = buffer.getInputStream();
 
                 totalChunks = Integer.parseInt(response.getRootElement().elementIterator("chunks").next().getText());
 
                 StreamThread streaming = new StreamThread(buffer.getOutputStream(), document, chunkNumber, chunk + 1, totalChunks);
                 streaming.start();
-
-                player = new ResizableJavaFXPlayerTest();
-                try {
-                    player.start(videoView, stream);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    streaming.pause();
-                }
-
 
             } else {
                 System.out.println("Video no encontrada");
@@ -177,9 +166,30 @@ public class VideoPlayerController {
         }
     }
 
+    void play(){
+        while(buffer == null || buffer.getAvailable() < 5000000){
+            try {
+                if(buffer != null) {
+                    System.out.println("Buffering: Only have " + buffer.getAvailable() + " bytes loaded");
+                }
+                Thread.sleep(1000);
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("Now playing");
+        player = new ResizableJavaFXPlayerTest();
+        try {
+            player.start(videoView, new FileInputStream(new File("/Users/Jai/Desktop/MKBHD.mp4")));//buffer.getInputStream());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     void pause(){
-//        player.pause();
-//        paused = true;
+        System.out.println("Pausar");
+        player.pause();
+        paused = true;
     }
 
     boolean isPlaying(){
@@ -196,6 +206,7 @@ public class VideoPlayerController {
     }
 
     void unpause(){
+        player.pause();
     }
 
 

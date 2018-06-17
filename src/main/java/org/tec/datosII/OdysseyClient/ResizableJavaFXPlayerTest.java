@@ -39,6 +39,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import uk.co.caprica.vlcj.component.DirectMediaPlayerComponent;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
+import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.direct.BufferFormat;
 import uk.co.caprica.vlcj.player.direct.BufferFormatCallback;
 import uk.co.caprica.vlcj.player.direct.DirectMediaPlayer;
@@ -75,8 +76,6 @@ import java.nio.ByteBuffer;
  */
 public class ResizableJavaFXPlayerTest{
 
-//    private static final String PATH_TO_VIDEO = "/Users/Jai/Desktop/test.mp4";
-
     private ImageView imageView;
 
     private DirectMediaPlayerComponent mediaPlayerComponent;
@@ -88,6 +87,8 @@ public class ResizableJavaFXPlayerTest{
     private WritablePixelFormat<ByteBuffer> pixelFormat;
 
     private FloatProperty videoSourceRatioProperty;
+
+    private MediaPlayer player;
 
     public void start(Pane holder, InputStream stream) throws Exception {
         new NativeDiscovery().discover();
@@ -119,8 +120,8 @@ public class ResizableJavaFXPlayerTest{
             }
         };
 
-
-        mediaPlayerComponent.getMediaPlayer().playMedia(media);
+        player = mediaPlayerComponent.getMediaPlayer();
+        player.playMedia(media);
     }
 
     private void initializeImageView() {
@@ -163,7 +164,12 @@ public class ResizableJavaFXPlayerTest{
     }
 
     public void pause(){
-//        mediaPlayerComponent.getMediaPlayer().pause();
+        if(player.canPause()){
+            player.pause();
+            System.out.println("Puede pausar");
+        }else{
+            System.out.println("No puede pausar");
+        }
     }
 
     private class CanvasPlayerComponent extends DirectMediaPlayerComponent {

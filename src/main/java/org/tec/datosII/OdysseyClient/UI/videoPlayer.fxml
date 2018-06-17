@@ -47,6 +47,6 @@
          </padding></HBox>
    </bottom>
    <center>
-      <Pane fx:id="videoView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <Pane fx:id="videoView" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: BLACK;" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>
