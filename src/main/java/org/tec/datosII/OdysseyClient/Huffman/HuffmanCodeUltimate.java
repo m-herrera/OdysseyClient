@@ -33,8 +33,8 @@ class Huffman {
         encode(root.left, str + "0", huffmanCode);
         encode(root.right, str + "1", huffmanCode);
     }
-
-    public static void decode(Node root, String sb) {
+//descomprime el codigo de huffman al original, necesita el root del arbol.
+    public static String decode(Node root, String sb) {
         String ans = "";
         Node curr = root;
         for (int i = 0; i < sb.length(); i++) {
@@ -49,9 +49,10 @@ class Huffman {
             }
         }
         System.out.print(ans);
+        return ans;
     }
-
-    public static void buildHuffmanTree(String text) {
+//este comprime el string y returna el codigo de huffman
+    public static String buildHuffmanTree(String text) {
         Map<Character, Integer> freq = new HashMap<>();
         char texto[] = text.toCharArray();
         Arrays.sort(texto);
@@ -95,12 +96,8 @@ class Huffman {
         }
 
         System.out.println("\nEncoded string is :\n" + sb);
+        return sb;
 
-        // traverse the Huffman Tree again and this time
-        // decode the encoded string
-
-        System.out.println("\nDecoded string is: \n");
-        decode(root, sb);
     }
 
 

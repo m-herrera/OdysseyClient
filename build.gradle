@@ -1,21 +1,44 @@
-version '1.0-SNAPSHOT'
+plugins {
+    id 'java'
+}
 
-apply plugin: 'java'
+version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.10
 targetCompatibility = 1.10
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile "com.jfoenix:jfoenix:9.0.3"
+    compile "com.jfoenix:jfoenix:9.0.4"
     compile "org.dom4j:dom4j:2.1.0"
     compile 'com.mpatric:mp3agic:0.9.1'
     compile 'javazoom:jlayer:1.0.1'
     compile 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
     compile 'org.ostermiller:utils:1.07.00'
     compile 'uk.co.caprica:vlcj:3.10.1'
+
+
+    //Test
+    compile 'com.google.guava:guava:25.0-jre'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    compile 'de.jensd:fontawesomefx-commons:9.1.2'
+    compile 'de.jensd:fontawesomefx-controls:9.1.2'
+    compile 'de.jensd:fontawesomefx-emojione:3.1.1-9.1.2'
+    compile 'de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2'
+    compile 'de.jensd:fontawesomefx-icons525:4.2.0-9.1.2'
+    compile 'de.jensd:fontawesomefx-materialdesignfont:2.0.26-9.1.2'
+    compile 'de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2'
+    compile 'de.jensd:fontawesomefx-materialstackicons:2.1-5-9.1.2'
+    compile 'de.jensd:fontawesomefx-octicons:4.3.0-9.1.2'
+    compile 'de.jensd:fontawesomefx-weathericons:2.0.10-9.1.2'
+    compile 'net.jthink:jaudiotagger:2.2.6-PATHRIK'
+    compile group: 'org.controlsfx', name: 'controlsfx', version: '9.0.0'
+
+
+
 }
