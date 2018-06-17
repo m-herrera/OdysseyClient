@@ -51,7 +51,7 @@ class Huffman {
         System.out.print(ans);
         return ans;
     }
-//este comprime el string y returna el cosigo de huffman
+//este comprime el string y returna el codigo de huffman
     public static String buildHuffmanTree(String text) {
         Map<Character, Integer> freq = new HashMap<>();
         char texto[] = text.toCharArray();
