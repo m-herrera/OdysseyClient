@@ -162,6 +162,10 @@ public class ResizableJavaFXPlayerTest{
         });
     }
 
+    public void pause(){
+//        mediaPlayerComponent.getMediaPlayer().pause();
+    }
+
     private class CanvasPlayerComponent extends DirectMediaPlayerComponent {
 
         public CanvasPlayerComponent() {

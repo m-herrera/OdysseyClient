@@ -13,15 +13,6 @@
    <bottom>
       <HBox prefHeight="40.0" prefWidth="1280.0" BorderPane.alignment="CENTER">
          <children>
-            <JFXButton onAction="#prev" text=" ">
-               <graphic>
-                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@icons/prev.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </JFXButton>
             <JFXButton onAction="#playPause" text=" ">
                <graphic>
                   <ImageView fx:id="playPauseBtn" fitHeight="100.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
@@ -31,7 +22,17 @@
                   </ImageView>
                </graphic>
             </JFXButton>
-            <JFXButton onAction="#next" text=" ">
+            <JFXSlider fx:id="slider" onMouseReleased="#sliderChanged" prefHeight="54.0" prefWidth="1052.0" stylesheets="@mainStyles.css" HBox.hgrow="ALWAYS" />
+            <JFXButton onAction="#settings" text=" ">
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/prev.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </JFXButton>
+            <JFXButton graphicTextGap="0.0" onAction="#fullscreen" text=" ">
                <graphic>
                   <ImageView fitHeight="100.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -40,7 +41,6 @@
                   </ImageView>
                </graphic>
             </JFXButton>
-            <JFXSlider fx:id="slider" onMouseReleased="#sliderChanged" prefHeight="54.0" prefWidth="1052.0" stylesheets="@mainStyles.css" HBox.hgrow="ALWAYS" />
          </children>
          <padding>
             <Insets right="20.0" />

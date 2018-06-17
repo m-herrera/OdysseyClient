@@ -33,7 +33,6 @@ public class StreamThread extends Thread {
             ResponseHandler handler = client.send(request.getBytes());
 
             try {
-                System.out.println(handler.getStrResponse());
                 Document response = handler.getXmlResponse();
 
 

@@ -57,6 +57,7 @@ public class VideoPlayerController {
     private int bufferSize = 31457280;
     private int totalChunks;
     private double amplitude = 0;
+    private boolean isPlaying = false;
 
     ResizableJavaFXPlayerTest player;
 
@@ -72,25 +73,27 @@ public class VideoPlayerController {
     private Pane videoView;
 
     @FXML
-    void next(ActionEvent event) {
+    void fullscreen(ActionEvent event) {
 
     }
 
     @FXML
     void playPause(ActionEvent event) {
-        if(isPlaying()){
+        if(isPaused()){
             playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/play.png"));
-        }else if(isPaused()){
             unpause();
+        }else if(isPlaying()){
             playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            pause();
         }else{
             playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
             play(0);
+            isPlaying = true;
         }
     }
 
     @FXML
-    void prev(ActionEvent event) {
+    void settings(ActionEvent event) {
 
     }
 
@@ -162,11 +165,12 @@ public class VideoPlayerController {
                     player.start(videoView, stream);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    streaming.pause();
                 }
 
-                this.pausedChunk = streaming.pause();
+
             } else {
-                System.out.println("Cancion no encontrada");
+                System.out.println("Video no encontrada");
             }
         }catch (Exception ex){
             ex.printStackTrace();
@@ -174,17 +178,12 @@ public class VideoPlayerController {
     }
 
     void pause(){
-        //player.pause()
-        paused = true;
+//        player.pause();
+//        paused = true;
     }
 
     boolean isPlaying(){
-//        if(thread != null){
-//            return thread.isAlive();
-//        }else{
-//            return false;
-//        }
-        return false;
+        return isPlaying;
     }
 
     boolean isPaused(){
