@@ -34,8 +34,6 @@ public class VideoWindow {
         loader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
 
         videoPlayer = new Stage();
-        videoPlayer.initOwner(App.getRootStage());
-        videoPlayer.initModality(Modality.WINDOW_MODAL);
         videoPlayer.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
@@ -48,7 +46,7 @@ public class VideoWindow {
         Scene scene = new Scene(window, 1280, 720);
         videoPlayer.setTitle("Video Player");
         videoPlayer.setScene(scene);
-        videoPlayer.setResizable(false);
+        videoPlayer.setResizable(true);
     }
 
     /**
@@ -58,6 +56,7 @@ public class VideoWindow {
     public void showAndWait(Metadata metadata){
         controller = loader.getController();
         controller.load(metadata);
+        controller.setStage(videoPlayer);
         videoPlayer.showAndWait();
     }
 }

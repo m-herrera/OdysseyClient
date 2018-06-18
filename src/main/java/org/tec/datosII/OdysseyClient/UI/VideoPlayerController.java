@@ -1,64 +1,40 @@
 package org.tec.datosII.OdysseyClient.UI;
 
-import com.Ostermiller.util.CircularByteBuffer;
 import com.jfoenix.controls.JFXSlider;
-import com.sun.jna.Memory;
-import com.sun.jna.NativeLibrary;
-import javafx.animation.AnimationTimer;
-import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TreeItem;
+import javafx.scene.Scene;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.tec.datosII.OdysseyClient.*;
-import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
-import uk.co.caprica.vlcj.component.DirectMediaPlayerComponent;
-import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
-import uk.co.caprica.vlcj.discovery.NativeDiscovery;
-import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
-import uk.co.caprica.vlcj.player.direct.BufferFormat;
-import uk.co.caprica.vlcj.player.direct.BufferFormatCallback;
-import uk.co.caprica.vlcj.player.direct.DefaultDirectMediaPlayer;
-import uk.co.caprica.vlcj.player.direct.DirectMediaPlayer;
-import uk.co.caprica.vlcj.player.direct.format.RV32BufferFormat;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
+import java.io.*;
 import java.util.Base64;
-
-import javax.swing.*;
 
 public class VideoPlayerController {
     Metadata video;
 
-    private boolean paused = false;// true;
+    private boolean paused = false;
     private int pausedChunk;
-    private int bufferSize = 31457280;
+    private long chunkSize;
     private int totalChunks;
-    private double amplitude = 0;
+    private boolean isPlaying = false;
+    private File buffer;
+    private Stage stage;
+    private StreamThread streaming;
 
-    ResizableJavaFXPlayerTest player;
+    MediaPlayer player;
 
     public DoubleProperty currentPercent = new SimpleDoubleProperty(0);
 
@@ -69,49 +45,57 @@ public class VideoPlayerController {
     private JFXSlider slider;
 
     @FXML
-    private Pane videoView;
+    private MediaView videoView;
 
     @FXML
-    void next(ActionEvent event) {
-
-    }
-
-    @FXML
-    void playPause(ActionEvent event) {
-        if(isPlaying()){
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/play.png"));
-        }else if(isPaused()){
-            unpause();
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
-        }else{
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
-            play(0);
+    void fullscreen(ActionEvent event) {
+        if(stage.isFullScreen()){
+            stage.setFullScreen(false);
+        }else {
+            stage.setFullScreen(true);
         }
     }
 
     @FXML
-    void prev(ActionEvent event) {
-
+    void playPause(ActionEvent event) {
+        if(isPaused()){
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            unpause();
+        }else if(isPlaying()){
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/play.png"));
+            pause();
+        }else{
+            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            play();
+            isPlaying = true;
+        }
     }
+
 
     @FXML
     void sliderChanged(MouseEvent event) {
-
+        forward((int) slider.getValue());
+        playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
     }
+
 
     void load(Metadata video){
         this.video = video;
+        new Thread(()->{buffer(0);}).start();
     }
 
     void stop(){
-
+        if(isPlaying()) {
+            player.stop();
+        }
+        streaming.pause();
     }
 
     /**
-     * Reproduce una video
+     * Descarga el video
      * @param chunk Bloque desde el cual reproducir la cancion
      */
-    void play(int chunk) {
+    void buffer(int chunk) {
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "5");
 
@@ -133,12 +117,8 @@ public class VideoPlayerController {
 
         String request = document.asXML();
 
-        System.out.println(request);
-
         NioClient client = NioClient.getInstance();
         ResponseHandler handler = client.send(request.getBytes());
-
-        System.out.println(handler.getStrResponse());
 
         try {
             Document response = handler.getXmlResponse();
@@ -146,59 +126,79 @@ public class VideoPlayerController {
             if (response.getRootElement().elementIterator("error").next().getText().equals("false")) {
                 String video = response.getRootElement().elementIterator("content").next().getText();
 
-                CircularByteBuffer buffer = new CircularByteBuffer(bufferSize);
+                buffer = File.createTempFile("odyssey", "buffer");
 
-                buffer.getOutputStream().write(Base64.getDecoder().decode(video));
+                OutputStream outputStream = new FileOutputStream(buffer);
 
-                InputStream stream = buffer.getInputStream();
+                outputStream.write(Base64.getDecoder().decode(video));
+                chunkSize = buffer.length();
 
                 totalChunks = Integer.parseInt(response.getRootElement().elementIterator("chunks").next().getText());
 
-                StreamThread streaming = new StreamThread(buffer.getOutputStream(), document, chunkNumber, chunk + 1, totalChunks);
+                streaming = new StreamThread(outputStream, document, chunkNumber, chunk + 1, totalChunks);
                 streaming.start();
 
-                player = new ResizableJavaFXPlayerTest();
-                try {
-                    player.start(videoView, stream);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                this.pausedChunk = streaming.pause();
             } else {
-                System.out.println("Cancion no encontrada");
+                System.out.println("Video no encontrada");
             }
         }catch (Exception ex){
             ex.printStackTrace();
         }
     }
 
+    void play(){
+        while(buffer == null || buffer.length() < 0.1 * chunkSize * totalChunks){
+            try {
+                if(buffer != null) {
+                    System.out.println("Buffering: Only have " + buffer.length() + " bytes loaded");
+                }
+                Thread.sleep(1000);
+            }catch(Exception ex){
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("Now playing " + buffer.length() + " bytes");
+
+        player = new MediaPlayer(new Media(buffer.toURI().toString()));
+        videoView.setMediaPlayer(player);
+        player.play();
+        player.currentTimeProperty().addListener(new ChangeListener<Duration>() {
+            @Override
+            public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
+                slider.setValue(newValue.toSeconds() / player.getTotalDuration().toSeconds() * 100);
+            }
+        });
+
+    }
+
     void pause(){
-        //player.pause()
+        player.pause();
         paused = true;
     }
 
     boolean isPlaying(){
-//        if(thread != null){
-//            return thread.isAlive();
-//        }else{
-//            return false;
-//        }
-        return false;
+        return isPlaying;
     }
 
     boolean isPaused(){
         return paused;
     }
 
-    void forward(int slider){
-//        int chunk = thread.getTotalChunks() * slider / 100;
-//        play(currentSong, chunk);
+    void forward(double slider){
+        Duration duration = player.getTotalDuration();
+        Duration time = duration.multiply(slider / 100);
+        System.out.println(time.toSeconds());
+        player.seek(time);
     }
 
     void unpause(){
+        paused = false;
+        player.play();
     }
 
+    void setStage(Stage stage){
+        this.stage = stage;
+    }
 
 }
 
