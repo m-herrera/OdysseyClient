@@ -10,10 +10,12 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,14 +24,17 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
-import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.tec.datosII.OdysseyClient.*;
+
 import javax.imageio.ImageIO;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -219,16 +224,14 @@ public class MainWindowController {
 
         VisualizerThread visualizer = new VisualizerThread(MusicPlayer.getInstance(), volumeVisualizer);
         visualizer.start();
-
-        songList.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
-            @Override
-            public void onChanged(Change<? extends Node> c) {
-                if(scrollBar == null){
-                    scrollBar = getVerticalScrollbar(songList);
-
-                    scrollBar.valueProperty().addListener(new ChangeListener<Number>() {
-                        @Override
-                        public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+    
+        songList.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
+            if (scrollBar == null) {
+                scrollBar = getVerticalScrollbar(songList);
+            
+                scrollBar.valueProperty().addListener(new ChangeListener<Number>() {
+                    @Override
+                    public void changed (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 //                    if(newValue.doubleValue() == scrollBar.getMin() && currentPage != 1){
 //                        currentPage--;
 //                        tableList.removeAll(tablePages[2].songs);
@@ -238,20 +241,19 @@ public class MainWindowController {
 //                        tableList.addAll(0, tablePages[0].songs); // No funciona, anade al final
 //                        songList.refresh();
 //                    }
-                            if(newValue.doubleValue() == scrollBar.getMax() && tablePages[2].songs.size() == 10){
-                                double oldMax = scrollBar.getMax();
-                                currentPage++;
+                        if (newValue.doubleValue() == scrollBar.getMax() && tablePages[2].songs.size() == 10) {
+                            double oldMax = scrollBar.getMax();
+                            currentPage++;
 //                        tableList.removeAll(tablePages[0].songs);
-                                tablePages[0] = tablePages[1];
-                                tablePages[1] = tablePages[2];
-                                tablePages[2] = populateTable(currentPage + 1);
-                                tableList.addAll(tablePages[2].songs);
-                                songList.refresh();
-                                scrollBar.setValue(oldMax);
-                            }
+                            tablePages[0] = tablePages[1];
+                            tablePages[1] = tablePages[2];
+                            tablePages[2] = populateTable(currentPage + 1);
+                            tableList.addAll(tablePages[2].songs);
+                            songList.refresh();
+                            scrollBar.setValue(oldMax);
                         }
-                    });
-                }
+                    }
+                });
             }
         });
     }
@@ -494,71 +496,65 @@ public class MainWindowController {
     void contextMenu(ContextMenuEvent event){
         ContextMenu altMenu = new ContextMenu();
         MenuItem properties = new MenuItem("Properties");
-        properties.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event){
-                try {
-                    Metadata selected = songList.getSelectionModel().getSelectedItem().getValue();
-                    PropertiesDialog dialog = new PropertiesDialog();
-                    Metadata updated = dialog.showAndWait(selected);
-                    if(updated != null){
-                        Document document = DocumentHelper.createDocument();
-                        Element root = document.addElement("request").addAttribute("opcode", "9");
-                        root.addElement("name").addText(selected.name);
-                        root.addElement("artist").addText(selected.artist);
-                        root.addElement("album").addText(selected.album);
-                        root.addElement("year").addText(selected.year);
-                        root.addElement("genre").addText(selected.genre);
-                        root.addElement("lyrics").addText(selected.lyrics);
-                        root.addElement("newName").addText(updated.name);
-                        root.addElement("newArtist").addText(updated.artist);
-                        root.addElement("newYear").addText(updated.year);
-                        root.addElement("newAlbum").addText(updated.album);
-                        root.addElement("newGenre").addText(updated.genre);
-                        root.addElement("newLyrics").addText(updated.lyrics);
-                        Element cover = root.addElement("newCover");
-                        if(updated.cover != null) {
-                            String imageString = null;
-                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                            ImageIO.write(SwingFXUtils.fromFXImage(updated.cover, null), "png", bos);
-                            byte[] imageBytes = bos.toByteArray();
-
-                            String encodedFile = Base64.getEncoder().encodeToString(imageBytes);
-                            cover.addText(encodedFile);
-
-                            bos.close();
-                        }
-
-                        String xmlRequest = document.asXML();
-                        ResponseHandler handler = NioClient.getInstance().send(document.asXML().getBytes());
-                        handler.getStrResponse();
-                        updateSongs();
+        properties.setOnAction(event1 -> {
+            try {
+                Metadata selected = songList.getSelectionModel().getSelectedItem().getValue();
+                PropertiesDialog dialog = new PropertiesDialog();
+                Metadata updated = dialog.showAndWait(selected);
+                if (updated != null) {
+                    Document document = DocumentHelper.createDocument();
+                    Element root = document.addElement("request").addAttribute("opcode", "9");
+                    root.addElement("name").addText(selected.name);
+                    root.addElement("artist").addText(selected.artist);
+                    root.addElement("album").addText(selected.album);
+                    root.addElement("year").addText(selected.year);
+                    root.addElement("genre").addText(selected.genre);
+                    root.addElement("lyrics").addText(selected.lyrics);
+                    root.addElement("newName").addText(updated.name);
+                    root.addElement("newArtist").addText(updated.artist);
+                    root.addElement("newYear").addText(updated.year);
+                    root.addElement("newAlbum").addText(updated.album);
+                    root.addElement("newGenre").addText(updated.genre);
+                    root.addElement("newLyrics").addText(updated.lyrics);
+                    Element cover = root.addElement("newCover");
+                    if (updated.cover != null) {
+                        String imageString = null;
+                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        ImageIO.write(SwingFXUtils.fromFXImage(updated.cover, null), "png", bos);
+                        byte[] imageBytes = bos.toByteArray();
+                    
+                        String encodedFile = Base64.getEncoder().encodeToString(imageBytes);
+                        cover.addText(encodedFile);
+                    
+                        bos.close();
                     }
-                }catch (IOException ex){
-                    ex.printStackTrace();
+                
+                    String xmlRequest = document.asXML();
+                    ResponseHandler handler = NioClient.getInstance().send(document.asXML().getBytes());
+                    handler.getStrResponse();
+                    updateSongs();
                 }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         });
 
         MenuItem delete = new MenuItem("Delete");
-        delete.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                Document document = DocumentHelper.createDocument();
-                Element root = document.addElement("request").addAttribute("opcode", "8");
-
-                Metadata song = songList.getSelectionModel().getSelectedItem().getValue();
-
-                root.addElement("name").addText(song.name);
-                root.addElement("artist").addText(song.artist);
-                root.addElement("year").addText(song.year);
-                root.addElement("album").addText(song.album);
-                root.addElement("genre").addText(song.genre);
-
-                NioClient.getInstance().send(document.asXML().getBytes());
-
-                updateSongs();
-            }
+        delete.setOnAction(event12 -> {
+            Document document = DocumentHelper.createDocument();
+            Element root = document.addElement("request").addAttribute("opcode", "8");
+        
+            Metadata song = songList.getSelectionModel().getSelectedItem().getValue();
+        
+            root.addElement("name").addText(song.name);
+            root.addElement("artist").addText(song.artist);
+            root.addElement("year").addText(song.year);
+            root.addElement("album").addText(song.album);
+            root.addElement("genre").addText(song.genre);
+        
+            NioClient.getInstance().send(document.asXML().getBytes());
+        
+            updateSongs();
         });
 
         altMenu.getItems().add(delete);
@@ -605,7 +601,7 @@ public class MainWindowController {
                 newSong.year = song.elementIterator("year").next().getText();
                 newSong.lyrics = song.elementIterator("lyrics").next().getText();
 //                newSong.type = song.elementIterator("type").next().getText();
-                newSong.type = "audio"; //"video";
+                newSong.type = "audio";
 
                 page.songs.add(newSong);
             }
@@ -671,8 +667,8 @@ public class MainWindowController {
             }
 
             LyricsGuessing.population = population;
-
-            if(population.size() > 0) {
+    
+            if (! population.isEmpty()) {
                 guessingAnswer.setText(population.get(0));
             }
         }catch (Exception ex){}
@@ -707,6 +703,23 @@ public class MainWindowController {
     void rightGuess(ActionEvent event) {
         searchTextfield.setText(guessingAnswer.getText());
         search(new ActionEvent());
+    }
+    
+    @FXML
+    void openVL () {
+        
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("VideoLibrary.fxml"));
+            Parent page = loader.load();
+            Scene mainScene = new Scene(page, 1480, 500);
+            
+            App.getRootStage().setScene(mainScene);
+            App.getRootStage().sizeToScene();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
     }
 
 }

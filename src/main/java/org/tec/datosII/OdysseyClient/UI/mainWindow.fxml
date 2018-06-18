@@ -1,22 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
-<?import com.jfoenix.controls.JFXComboBox?>
-<?import com.jfoenix.controls.JFXListView?>
-<?import com.jfoenix.controls.JFXProgressBar?>
-<?import com.jfoenix.controls.JFXSlider?>
-<?import com.jfoenix.controls.JFXTextField?>
-<?import com.jfoenix.controls.JFXToolbar?>
-<?import com.jfoenix.controls.JFXTreeTableView?>
+<?import com.jfoenix.controls.*?>
+<?import de.jensd.fx.glyphs.materialicons.MaterialIconView?>
+<?import eu.hansolo.medusa.Gauge?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
-<BorderPane id="mainWindow" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: WHITE;" xmlns="http://javafx.com/javafx/9.0.4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tec.datosII.OdysseyClient.UI.MainWindowController">
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" id="mainWindow" maxHeight="-Infinity" maxWidth="-Infinity"
+            prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: WHITE;"
+            xmlns="http://javafx.com/javafx/10.0.1"
+            fx:controller="org.tec.datosII.OdysseyClient.UI.MainWindowController">
    <bottom>
       <HBox prefHeight="40.0" prefWidth="1280.0" BorderPane.alignment="CENTER">
          <children>
@@ -83,6 +78,19 @@
                <children>
                   <Label text="Sort by:" />
                   <JFXComboBox fx:id="sortCombo" onAction="#sort" prefHeight="27.0" prefWidth="103.0" />
+                  <JFXButton onAction="#openVL" text="VideoLibrary">
+                     <ripplerFill>
+                        <LinearGradient endX="1.0" endY="1.0">
+                           <stops>
+                              <Stop color="#2600ff"/>
+                              <Stop color="#f200ff" offset="1.0"/>
+                           </stops>
+                        </LinearGradient>
+                     </ripplerFill>
+                     <graphic>
+                        <MaterialIconView glyphName="ONDEMAND_VIDEO" size="26.0"/>
+                     </graphic>
+                  </JFXButton>
                </children>
             </HBox>
          </center></JFXToolbar>
@@ -92,6 +100,8 @@
          <children>
             <JFXListView fx:id="friendsList" prefHeight="419.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
             <JFXProgressBar fx:id="volumeVisualizer" prefHeight="116.0" prefWidth="199.0" progress="0.0" rotate="-90.0" />
+            <Gauge barEffectEnabled="true" needleBehavior="OPTIMIZED" needleShape="FLAT" needleType="AVIONIC"
+                   skinType="MODERN"/>
          </children>
          <padding>
             <Insets bottom="60.0" />
@@ -105,7 +115,16 @@
       <VBox alignment="CENTER" prefHeight="630.0" prefWidth="218.0" spacing="20.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="Lyrics Guessing" />
-            <JFXTextField fx:id="beforeGuess" promptText="Before" />
+            <JFXTextField fx:id="beforeGuess" promptText="Before">
+               <focusColor>
+                  <LinearGradient endX="1.0" endY="1.0">
+                     <stops>
+                        <Stop color="BLACK"/>
+                        <Stop color="RED" offset="1.0"/>
+                     </stops>
+                  </LinearGradient>
+               </focusColor>
+            </JFXTextField>
             <Label fx:id="guessingAnswer" prefHeight="100.0" prefWidth="194.0" textAlignment="CENTER" />
             <JFXTextField fx:id="afterGuess" promptText="After" />
             <JFXButton onAction="#startGuess" prefWidth="150.0" style="-fx-background-color: #F55B3B;" text="Start search" />
