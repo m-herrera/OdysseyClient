@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'application'
+   // id 'application'
 }
 
 version '1.0-SNAPSHOT'
@@ -9,7 +9,7 @@ sourceCompatibility = 1.10
 targetCompatibility = 1.10
 
 //mainClassName = 'org.tec.datosII.OdysseyClient.UI.Main'
-mainClassName = 'org.tec.datosII.OdysseyClient.App'
+//mainClassName = 'org.tec.datosII.OdysseyClient.App'
 
 repositories {
     jcenter()
