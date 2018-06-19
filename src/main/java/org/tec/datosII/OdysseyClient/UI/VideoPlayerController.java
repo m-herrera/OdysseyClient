@@ -57,7 +57,18 @@ public class VideoPlayerController {
     private StackPane stackPane;
     @FXML
     private HBox boxes;
-    
+
+    @FXML
+    void initialize () {
+        videoView.getParent().layoutBoundsProperty().addListener((observable, oldValue, newValue) -> {
+            videoView.setFitHeight(newValue.getHeight());
+            videoView.setFitWidth(newValue.getWidth());
+            videoView.setX((newValue.getWidth() - videoView.getBoundsInLocal().getWidth()) / 2);
+            videoView.setY((newValue.getHeight() - videoView.getBoundsInLocal().getHeight()) / 2);
+        });
+        slider.setValue(0);
+    }
+
     @FXML
     void fullscreen (ActionEvent event) {
         if (stage.isFullScreen()) {
@@ -89,16 +100,7 @@ public class VideoPlayerController {
         playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
     }
     
-    
-    void initialize () {
-        videoView.getParent().layoutBoundsProperty().addListener((observable, oldValue, newValue) -> {
-            videoView.setFitHeight(newValue.getHeight());
-            videoView.setFitWidth(newValue.getWidth());
-            videoView.setX((newValue.getWidth() - videoView.getBoundsInLocal().getWidth()) / 2);
-            videoView.setY((newValue.getHeight() - videoView.getBoundsInLocal().getHeight()) / 2);
-        });
-        slider.setValue(0);
-    }
+
     
     
     void load (Metadata video) {
