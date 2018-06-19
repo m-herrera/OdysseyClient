@@ -31,7 +31,7 @@ public class StreamThread extends Thread {
 
             NioClient client = NioClient.getInstance();
             ResponseHandler handler = client.send(request.getBytes());
-
+            System.out.println("Waiting for chunk " + chunk);
             try {
                 Document response = handler.getXmlResponse();
 
@@ -45,6 +45,7 @@ public class StreamThread extends Thread {
             }catch (Exception ex){
             }
 
+            System.out.println("Got chunk " + chunk);
             chunk++;
         }
     }
