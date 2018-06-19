@@ -1,9 +1,18 @@
 package org.tec.datosII.OdysseyClient.Huffman;
 
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.QName;
+import org.dom4j.tree.DefaultElement;
+import org.tec.datosII.OdysseyClient.NioClient;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.sql.Timestamp;
 import java.util.*;
 
-class Node
-{
+class Node{
     char ch;
     int freq;
     Node left = null, right = null;
@@ -20,9 +29,40 @@ class Node
         this.left = left;
         this.right = right;
     }
+
+    public Element toXML(){
+        Element root = DocumentHelper.createElement("tree");
+
+        root.addElement("ch").setText(String.valueOf(this.ch));
+        root.addElement("freq").setText(String.valueOf(this.freq));
+
+        Element left;
+        if(this.left == null) {
+            left = root.addElement("left");
+            left.addElement("freq").setText("-1");
+        }else{
+            left = this.left.toXML();
+            left.setQName(new QName("left"));
+            root.add(left);
+        }
+
+        Element right;
+        if(this.right == null) {
+            right = root.addElement("right");
+            right.addElement("freq").setText("-1");
+        }else{
+            right = this.right.toXML();
+            right.setQName(new QName("right"));
+            root.add(right);
+        }
+
+        return root;
+    }
 }
 
-class Huffman {
+public class Huffman {
+    public static Node root;
+
     public static void encode(Node root, String str, Map<Character, String> huffmanCode) {
         if (root == null)
             return;
@@ -52,7 +92,7 @@ class Huffman {
         return ans;
     }
 //este comprime el string y returna el codigo de huffman
-    public static String buildHuffmanTree(String text) {
+    public static Element buildHuffmanTree(String text) {
         Map<Character, Integer> freq = new HashMap<>();
         char texto[] = text.toCharArray();
         Arrays.sort(texto);
@@ -80,7 +120,7 @@ class Huffman {
             pq.add(new Node('\0', sum, left, right));
         }
 
-        Node root = pq.peek();
+        root = pq.peek();
         Map<Character, String> huffmanCode = new HashMap<>();
         encode(root, "", huffmanCode);
         System.out.println("Huffman Codes are :\n");
@@ -96,12 +136,55 @@ class Huffman {
         }
 
         System.out.println("\nEncoded string is :\n" + sb);
-        return sb;
 
+        return null;
+//        Element parent = DocumentHelper.createElement("compressed");
+//        Element tree = root.toXML();
+//        parent.addElement("content").addText(sb);
+//        parent.add(tree);
+//        System.out.print(parent.asXML());
+//        return parent;
+    }
+
+    private static Node getRoot(Element element){
+        if(element.elementIterator("freq").next().getText().equals("-1")){
+            return null;
+        }
+        char ch = element.elementIterator("ch").next().getText().charAt(0);
+        int freq = Integer.parseInt(element.elementIterator("freq").next().getText());
+        Node left = getRoot(element.elementIterator("left").next());
+        Node right = getRoot(element.elementIterator("right").next());
+
+        return new Node(ch, freq, left, right);
+    }
+
+    public static String getTree(Element element){
+        String decode = "";
+        Node root = null;
+        decode = element.elementIterator("content").next().getText();
+        root = getRoot(element.elementIterator("tree").next());
+
+        return decode(root, decode);
     }
 
 
+
+
+
     public static void main(String[] args) {
-        buildHuffmanTree("Que onda que pez");
+        try {
+            byte[] file = Files.readAllBytes(new File("/Users/Jai/Desktop/syncWeb.mp4").toPath());
+            String encodedFile = Base64.getEncoder().encodeToString(file);
+
+            long first = System.currentTimeMillis();
+            Element tree = buildHuffmanTree("amedipqodr");
+            long last = System.currentTimeMillis();
+            System.out.println(last - first);
+            System.out.println("Duraria " + (encodedFile.length()/10 *(last - first)) );
+//            System.out.println(tree.asXML());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

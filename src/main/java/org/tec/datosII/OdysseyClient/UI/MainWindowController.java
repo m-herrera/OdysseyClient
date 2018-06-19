@@ -341,7 +341,7 @@ public class MainWindowController {
                 return;
             }
             Metadata metadata = treeItem.getValue();
-            if(metadata.type.equals("audio")) {
+            if(metadata.type.equals("song")) {
                 MusicPlayer.getInstance().play(treeItem.getValue(), 0);
                 currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
                 playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
@@ -600,8 +600,7 @@ public class MainWindowController {
                 newSong.genre = song.elementIterator("genre").next().getText();
                 newSong.year = song.elementIterator("year").next().getText();
                 newSong.lyrics = song.elementIterator("lyrics").next().getText();
-//                newSong.type = song.elementIterator("type").next().getText();
-                newSong.type = "video";
+                newSong.type = song.elementIterator("type").next().getText();
 
                 page.songs.add(newSong);
             }
