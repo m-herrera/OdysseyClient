@@ -23,10 +23,12 @@ import java.io.*;
 import java.util.Base64;
 
 public class VideoPlayerController {
+    private final String PAUSE_BTN = "org/tec/datosII/OdysseyClient/UI/icons/pause.png";
+    private final String PLAY_BTN = "org/tec/datosII/OdysseyClient/UI/icons/play.png";
+
     Metadata video;
 
     private boolean paused = false;
-    private int pausedChunk;
     private long chunkSize;
     private int totalChunks;
     private boolean isPlaying = false;
@@ -59,13 +61,13 @@ public class VideoPlayerController {
     @FXML
     void playPause(ActionEvent event) {
         if(isPaused()){
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            playPauseBtn.setImage(new Image(PAUSE_BTN));
             unpause();
         }else if(isPlaying()){
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/play.png"));
+            playPauseBtn.setImage(new Image(PLAY_BTN));
             pause();
         }else{
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            playPauseBtn.setImage(new Image(PAUSE_BTN));
             play();
             isPlaying = true;
         }
@@ -96,6 +98,8 @@ public class VideoPlayerController {
      * @param chunk Bloque desde el cual reproducir la cancion
      */
     void buffer(int chunk) {
+        System.out.println("Buffering");
+
         Document document = DocumentHelper.createDocument();
         Element root = document.addElement("request").addAttribute("opcode", "5");
 
@@ -122,15 +126,16 @@ public class VideoPlayerController {
 
         try {
             Document response = handler.getXmlResponse();
+            System.out.println("Got first chunk");
 
             if (response.getRootElement().elementIterator("error").next().getText().equals("false")) {
-                String video = response.getRootElement().elementIterator("content").next().getText();
+                String binaryVideo = response.getRootElement().elementIterator("content").next().getText();
 
                 buffer = File.createTempFile("odyssey", "buffer");
 
                 OutputStream outputStream = new FileOutputStream(buffer);
 
-                outputStream.write(Base64.getDecoder().decode(video));
+                outputStream.write(Base64.getDecoder().decode(binaryVideo));
                 chunkSize = buffer.length();
 
                 totalChunks = Integer.parseInt(response.getRootElement().elementIterator("chunks").next().getText());
@@ -185,9 +190,16 @@ public class VideoPlayerController {
     }
 
     void forward(double slider){
+        while(buffer.length() < (slider / 100) * totalChunks * chunkSize){
+            System.out.println("Buffering");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         Duration duration = player.getTotalDuration();
         Duration time = duration.multiply(slider / 100);
-        System.out.println(time.toSeconds());
         player.seek(time);
     }
 

@@ -75,7 +75,7 @@ public class App extends Application {
     public static void main(String[] args){
         try{
             NioClient client = NioClient.getInstance();
-            client.setUp(InetAddress.getLocalHost(), 2000);
+            client.setUp(InetAddress.getByName("192.168.100.12"), 2000);
 
         } catch (Exception e) {
             e.printStackTrace();
