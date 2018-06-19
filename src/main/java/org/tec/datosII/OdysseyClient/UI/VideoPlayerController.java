@@ -7,9 +7,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.scene.image.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -18,8 +19,14 @@ import javafx.util.Duration;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.tec.datosII.OdysseyClient.*;
-import java.io.*;
+import org.tec.datosII.OdysseyClient.Metadata;
+import org.tec.datosII.OdysseyClient.NioClient;
+import org.tec.datosII.OdysseyClient.ResponseHandler;
+import org.tec.datosII.OdysseyClient.StreamThread;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Base64;
 
 public class VideoPlayerController {
@@ -48,6 +55,15 @@ public class VideoPlayerController {
 
     @FXML
     private MediaView videoView;
+    
+    @FXML
+    private ImageView loadGIF;
+    
+    @FXML
+    private StackPane stackPane;
+    
+    private boolean existsGIF = true;
+    
 
     @FXML
     void fullscreen(ActionEvent event) {
@@ -98,6 +114,9 @@ public class VideoPlayerController {
      * @param chunk Bloque desde el cual reproducir la cancion
      */
     void buffer(int chunk) {
+
+//        loadGIF.setImage(new Image("org/tec/datosII/OdysseyClient/UI/giphy.gif"));
+        
         System.out.println("Buffering");
 
         Document document = DocumentHelper.createDocument();
@@ -152,6 +171,10 @@ public class VideoPlayerController {
     }
 
     void play(){
+
+//        stackPane.getChildren().remove(loadGIF);
+//        existsGIF = false;
+//
         while(buffer == null || buffer.length() < 0.1 * chunkSize * totalChunks){
             try {
                 if(buffer != null) {
