@@ -1,11 +1,15 @@
 plugins {
     id 'java'
+   // id 'application'
 }
 
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.10
 targetCompatibility = 1.10
+
+//mainClassName = 'org.tec.datosII.OdysseyClient.UI.Main'
+//mainClassName = 'org.tec.datosII.OdysseyClient.App'
 
 repositories {
     jcenter()
@@ -20,7 +24,6 @@ dependencies {
     compile 'javazoom:jlayer:1.0.1'
     compile 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
     compile 'org.ostermiller:utils:1.07.00'
-    compile 'uk.co.caprica:vlcj:3.10.1'
 
 
     //Test
@@ -36,9 +39,8 @@ dependencies {
     compile 'de.jensd:fontawesomefx-materialstackicons:2.1-5-9.1.2'
     compile 'de.jensd:fontawesomefx-octicons:4.3.0-9.1.2'
     compile 'de.jensd:fontawesomefx-weathericons:2.0.10-9.1.2'
-    compile 'net.jthink:jaudiotagger:2.2.6-PATHRIK'
-    compile group: 'org.controlsfx', name: 'controlsfx', version: '9.0.0'
-
+    compile group: 'net.bramp.ffmpeg', name: 'ffmpeg', version: '0.6.2'
+    compile 'eu.hansolo:Medusa:8.0'
 
 
 }
