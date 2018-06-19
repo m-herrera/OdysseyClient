@@ -19,10 +19,7 @@ import javafx.util.Duration;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.tec.datosII.OdysseyClient.Metadata;
-import org.tec.datosII.OdysseyClient.NioClient;
-import org.tec.datosII.OdysseyClient.ResponseHandler;
-import org.tec.datosII.OdysseyClient.StreamThread;
+import org.tec.datosII.OdysseyClient.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -62,9 +59,7 @@ public class VideoPlayerController {
     @FXML
     private StackPane stackPane;
     
-    private boolean existsGIF = true;
     
-
     @FXML
     void fullscreen(ActionEvent event) {
         if(stage.isFullScreen()){
@@ -114,8 +109,14 @@ public class VideoPlayerController {
      * @param chunk Bloque desde el cual reproducir la cancion
      */
     void buffer(int chunk) {
-
-//        loadGIF.setImage(new Image("org/tec/datosII/OdysseyClient/UI/giphy.gif"));
+    
+        String gif1 = "org/tec/datosII/OdysseyClient/UI/gif1.gif";
+        String gif2 = "org/tec/datosII/OdysseyClient/UI/gif2.gif1";
+        if (App.existsGIF) {
+            loadGIF.setImage(new Image(gif1));
+        } else if (! App.existsGIF) {
+            loadGIF.setImage(new Image(gif2));
+        }
         
         System.out.println("Buffering");
 
@@ -127,13 +128,8 @@ public class VideoPlayerController {
         root.addElement("year").addText(video.year);
         root.addElement("album").addText(video.album);
         root.addElement("genre").addText(video.genre);
-
-        currentPercent.addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                slider.adjustValue(newValue.doubleValue());
-            }
-        });
+    
+        currentPercent.addListener((observable, oldValue, newValue) -> slider.adjustValue(newValue.doubleValue()));
         paused = false;
 
         Element chunkNumber = root.addElement("chunk").addText(String.valueOf(chunk));
@@ -168,12 +164,16 @@ public class VideoPlayerController {
         }catch (Exception ex){
             ex.printStackTrace();
         }
+        if (! App.existsGIF) {
+            App.existsGIF = true;
+        }
+        
     }
 
     void play(){
-
-//        stackPane.getChildren().remove(loadGIF);
-//        existsGIF = false;
+    
+        stackPane.getChildren().remove(loadGIF);
+        App.existsGIF = false;
 //
         while(buffer == null || buffer.length() < 0.1 * chunkSize * totalChunks){
             try {
@@ -190,12 +190,7 @@ public class VideoPlayerController {
         player = new MediaPlayer(new Media(buffer.toURI().toString()));
         videoView.setMediaPlayer(player);
         player.play();
-        player.currentTimeProperty().addListener(new ChangeListener<Duration>() {
-            @Override
-            public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-                slider.setValue(newValue.toSeconds() / player.getTotalDuration().toSeconds() * 100);
-            }
-        });
+        player.currentTimeProperty().addListener((observable, oldValue, newValue) -> slider.setValue(newValue.toSeconds() / player.getTotalDuration().toSeconds() * 100));
 
     }
 
