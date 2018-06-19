@@ -34,12 +34,7 @@ public class VideoWindow {
         loader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
 
         videoPlayer = new Stage();
-        videoPlayer.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent event) {
-                controller.stop();
-            }
-        });
+        videoPlayer.setOnCloseRequest(event -> controller.stop());
 
         Parent window = loader.load();
 

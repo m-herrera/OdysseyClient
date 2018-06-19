@@ -17,8 +17,6 @@ public class App extends Application {
      */
     private static Stage rootStage;
     
-    public static Boolean existsGIF = true;
-    
     /**
      * Ancho por defecto de la ventana
      */
