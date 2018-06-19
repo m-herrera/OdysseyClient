@@ -18,7 +18,7 @@ public class AudioThread extends Thread {
     private int initialChunk;
     private boolean paused = true;
     private int pausedChunk;
-    private int bufferSize = 3 * 983040;
+    private int bufferSize = 983040;
     private int totalChunks;
     private double amplitude = 0;
     
