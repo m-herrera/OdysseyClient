@@ -321,9 +321,23 @@ public class MainWindowController {
             if(treeItem == null){
                 return;
             }
-            MusicPlayer.getInstance().play(treeItem.getValue(), 0);
-            currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
-            playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            Metadata metadata = treeItem.getValue();
+    
+            if (metadata.type.equals("song")) {
+                MusicPlayer.getInstance().play(treeItem.getValue(), 0);
+                currentlyPlaying = songList.getSelectionModel().getSelectedIndex();
+                playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
+            } else if (metadata.type.equals("video")) {
+                try {
+                    if (MusicPlayer.getInstance().isPlaying()) {
+                        MusicPlayer.getInstance().pause();
+                    }
+                    VideoWindow playerView = new VideoWindow();
+                    playerView.showAndWait(metadata);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
 
     }
@@ -347,6 +361,9 @@ public class MainWindowController {
                 playPauseBtn.setImage(new Image("org/tec/datosII/OdysseyClient/UI/icons/pause.png"));
             }else if(metadata.type.equals("video")){
                 try {
+                    if (MusicPlayer.getInstance().isPlaying()) {
+                        MusicPlayer.getInstance().pause();
+                    }
                     VideoWindow playerView = new VideoWindow();
                     playerView.showAndWait(metadata);
                 }catch (Exception ex){
