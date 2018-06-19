@@ -9,7 +9,10 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -242,7 +245,7 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
                 }
             } catch (Exception ex) {
             }
-
+    
             addLyrics();
 
         }else if(path.endsWith(".mp4")){
