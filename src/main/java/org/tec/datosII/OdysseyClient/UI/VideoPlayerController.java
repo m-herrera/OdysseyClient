@@ -9,6 +9,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.geometry.Bounds;
+import javafx.scene.Scene;
+import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
@@ -20,10 +23,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.tec.datosII.OdysseyClient.*;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Base64;
 
 public class VideoPlayerController {
@@ -60,6 +60,19 @@ public class VideoPlayerController {
     private StackPane stackPane;
     
     
+    void initialize(){
+        videoView.getParent().layoutBoundsProperty().addListener(new ChangeListener<Bounds>() {
+            @Override
+            public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
+                videoView.setFitHeight(newValue.getHeight());
+                videoView.setFitWidth(newValue.getWidth());
+                videoView.setX((newValue.getWidth() - videoView.getBoundsInLocal().getWidth()) / 2);
+                videoView.setY((newValue.getHeight() - videoView.getBoundsInLocal().getHeight()) / 2);
+            }
+        });
+        slider.setValue(0);
+    }
+
     @FXML
     void fullscreen(ActionEvent event) {
         if(stage.isFullScreen()){
@@ -101,7 +114,9 @@ public class VideoPlayerController {
         if(isPlaying()) {
             player.stop();
         }
-        streaming.pause();
+        if(streaming != null) {
+            streaming.pause();
+        }
     }
 
     /**

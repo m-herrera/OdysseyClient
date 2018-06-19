@@ -99,8 +99,9 @@
       <VBox alignment="TOP_CENTER" prefHeight="574.0" prefWidth="200.0" spacing="60.0" BorderPane.alignment="CENTER">
          <children>
             <JFXListView fx:id="friendsList" prefHeight="419.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
-            <Gauge fx:id="musicGauge" barEffectEnabled="true" needleBehavior="OPTIMIZED" needleShape="FLAT"
-                   needleType="AVIONIC" skinType="MODERN" VBox.vgrow="ALWAYS"/>
+            <JFXProgressBar fx:id="volumeVisualizer" prefHeight="116.0" prefWidth="199.0" progress="0.0" rotate="-90.0" />
+            <Gauge barEffectEnabled="true" needleBehavior="OPTIMIZED" needleShape="FLAT" needleType="AVIONIC"
+                   skinType="MODERN"/>
          </children>
          <padding>
             <Insets bottom="60.0" />
