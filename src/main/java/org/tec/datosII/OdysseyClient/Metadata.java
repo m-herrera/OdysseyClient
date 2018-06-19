@@ -220,7 +220,7 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
                     year += tag.getYear();
                     album += tag.getAlbum();
                     genre += genres[tag.getGenre()];
-                    type = "audio";
+                    type = "song";
 
                 } else if (mp3File.hasId3v2Tag()) {
                     ID3v2 tag = mp3File.getId3v2Tag();
@@ -238,7 +238,7 @@ public class Metadata extends RecursiveTreeObject<Metadata> {
                     if (image != null) {
                         cover = new Image(new ByteArrayInputStream(tag.getAlbumImage()));
                     }
-                    type = "audio";
+                    type = "song";
 
                 } else {
                     System.out.println("Other tag");
