@@ -7,6 +7,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -89,6 +90,17 @@ public class VideoPlayerController {
     }
     
     
+    void initialize () {
+        videoView.getParent().layoutBoundsProperty().addListener((observable, oldValue, newValue) -> {
+            videoView.setFitHeight(newValue.getHeight());
+            videoView.setFitWidth(newValue.getWidth());
+            videoView.setX((newValue.getWidth() - videoView.getBoundsInLocal().getWidth()) / 2);
+            videoView.setY((newValue.getHeight() - videoView.getBoundsInLocal().getHeight()) / 2);
+        });
+        slider.setValue(0);
+    }
+    
+    
     void load (Metadata video) {
         this.video = video;
         new Thread(() -> {
@@ -100,7 +112,9 @@ public class VideoPlayerController {
         if (isPlaying()) {
             player.stop();
         }
-        streaming.pause();
+        if (streaming != null) {
+            streaming.pause();
+        }
     }
     
     /**
@@ -111,6 +125,7 @@ public class VideoPlayerController {
     void buffer (int chunk) {
         
         String gif2 = "org/tec/datosII/OdysseyClient/UI/gif2.gif";
+    
         loadGIF.setImage(new Image(gif2));
         
         
@@ -185,28 +200,28 @@ public class VideoPlayerController {
         
         bands = player.getAudioSpectrumNumBands();
         rects = new Rectangle[bands];
-        
-        sliderBoxes();
+    
+        //sliderBoxes();
         
         player.play();
-        
-        player.setOnReady(() -> {
-            
-            double bandWidth = videoView.getBoundsInParent().getWidth() / rects.length;
-            for (Rectangle r : rects) {
-                r.setWidth(bandWidth);
-                r.setHeight(2);
-            }
-        });
-        
-        player.setAudioSpectrumListener((timestamp, duration, magnitudes, phases) -> {
-            for (int i = 0; i < rects.length; i++) {
-                double h = magnitudes[i] + 60;
-                if (h > 2) {
-                    rects[i].setHeight(h);
-                }
-            }
-        });
+
+//        player.setOnReady(() -> {
+//
+//            double bandWidth = videoView.getBoundsInParent().getWidth() / rects.length;
+//            for (Rectangle r : rects) {
+//                r.setWidth(bandWidth);
+//                r.setHeight(2);
+//            }
+//        });
+//
+//        player.setAudioSpectrumListener((timestamp, duration, magnitudes, phases) -> {
+//            for (int i = 0; i < rects.length; i++) {
+//                double h = magnitudes[i] + 60;
+//                if (h > 2) {
+//                    rects[i].setHeight(h);
+//                }
+//            }
+//        });
         
         player.currentTimeProperty().addListener((observable, oldValue, newValue) -> slider.setValue(newValue.toSeconds() / player.getTotalDuration().toSeconds() * 100));
         
