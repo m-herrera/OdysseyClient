@@ -1,15 +1,10 @@
 package org.tec.datosII.OdysseyClient.UI;
 
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import org.tec.datosII.OdysseyClient.App;
 import org.tec.datosII.OdysseyClient.Metadata;
-import org.tec.datosII.OdysseyClient.UI.PropertiesDialogController;
 
 import java.io.IOException;
 
