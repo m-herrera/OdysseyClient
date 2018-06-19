@@ -7,6 +7,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.scene.image.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -61,6 +63,20 @@ public class VideoPlayerController {
     
     
     @FXML
+    void initialize(){
+        videoView.getParent().layoutBoundsProperty().addListener(new ChangeListener<Bounds>() {
+            @Override
+            public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
+                videoView.setFitHeight(newValue.getHeight());
+                videoView.setFitWidth(newValue.getWidth());
+                videoView.setX((newValue.getWidth() - videoView.getBoundsInLocal().getWidth()) / 2);
+                videoView.setY((newValue.getHeight() - videoView.getBoundsInLocal().getHeight()) / 2);
+            }
+        });
+        slider.setValue(0);
+    }
+
+    @FXML
     void fullscreen(ActionEvent event) {
         if(stage.isFullScreen()){
             stage.setFullScreen(false);
@@ -101,7 +117,9 @@ public class VideoPlayerController {
         if(isPlaying()) {
             player.stop();
         }
-        streaming.pause();
+        if(streaming != null) {
+            streaming.pause();
+        }
     }
 
     /**
@@ -146,7 +164,7 @@ public class VideoPlayerController {
             if (response.getRootElement().elementIterator("error").next().getText().equals("false")) {
                 String binaryVideo = response.getRootElement().elementIterator("content").next().getText();
 
-                buffer = File.createTempFile("odyssey", "buffer");
+                buffer = new File("/Users/Jai/Desktop/prueba.mp4"); //) File.createTempFile("odyssey", "buffer");
 
                 OutputStream outputStream = new FileOutputStream(buffer);
 

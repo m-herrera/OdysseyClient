@@ -43,7 +43,7 @@ public class VideoWindow {
 
         Parent window = loader.load();
 
-        Scene scene = new Scene(window, 1280, 720);
+        Scene scene = new Scene(window, 1280, 808);
         videoPlayer.setTitle("Video Player");
         videoPlayer.setScene(scene);
         videoPlayer.setResizable(true);
